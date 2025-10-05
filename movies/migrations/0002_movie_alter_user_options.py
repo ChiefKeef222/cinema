@@ -7,29 +7,46 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('movies', '0001_initial'),
+        ("movies", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Movie',
+            name="Movie",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('public_id', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
-                ('title', models.CharField(max_length=255, verbose_name='Название фильма')),
-                ('description', models.TextField(max_length=1000, verbose_name='Описание фильма')),
-                ('duration', models.IntegerField(verbose_name='Продолжительность в минутах')),
-                ('poster_url', models.URLField(verbose_name='ссылка на постер')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                (
+                    "public_id",
+                    models.UUIDField(
+                        db_index=True, default=uuid.uuid4, editable=False, unique=True
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(max_length=255, verbose_name="Название фильма"),
+                ),
+                (
+                    "description",
+                    models.TextField(max_length=1000, verbose_name="Описание фильма"),
+                ),
+                (
+                    "duration",
+                    models.IntegerField(verbose_name="Продолжительность в минутах"),
+                ),
+                ("poster_url", models.URLField(verbose_name="ссылка на постер")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Фильм',
-                'verbose_name_plural': 'Фильмы',
+                "verbose_name": "Фильм",
+                "verbose_name_plural": "Фильмы",
             },
         ),
         migrations.AlterModelOptions(
-            name='user',
-            options={'verbose_name': 'Пользователь', 'verbose_name_plural': 'Пользователи'},
+            name="user",
+            options={
+                "verbose_name": "Пользователь",
+                "verbose_name_plural": "Пользователи",
+            },
         ),
     ]
