@@ -3,7 +3,6 @@ from rest_framework import serializers
 from movies.models import User, Movie
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='public_id', read_only = True)
     created_at = serializers.DateTimeField(read_only=True)
