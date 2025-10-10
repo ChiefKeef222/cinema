@@ -1,7 +1,8 @@
-from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
+from users.permissions import IsAdmin
 
 from movies.serializer import MovieSerializer
 from movies.models import Movie
@@ -13,8 +14,8 @@ class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_permissions(self):
-        if self.action in ["update", "partial_update", "destroy"]:
-            self.permission_classes = [IsAdminUser]
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            self.permission_classes = [IsAdmin]
         else:
             self.permission_classes = [IsAuthenticatedOrReadOnly]
         return super().get_permissions()
