@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django_filters",
     'users',
     'rest_framework_simplejwt',
+    'schedule',
 ]
 
 MIDDLEWARE = [
