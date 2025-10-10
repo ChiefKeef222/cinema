@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     "movies",
     "rest_framework",
     "django_filters",
+    'users',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -67,8 +69,8 @@ WSGI_APPLICATION = "cinema.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "cinema",
-        "USER": "arhat",
+        "NAME": "cinema_db",
+        "USER": "cinema",
         "PASSWORD": "Barsik_04",
         "HOST": "localhost",
         "PORT": "5432",
@@ -118,13 +120,13 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # user
-AUTH_USER_MODEL = "movies.User"
+AUTH_USER_MODEL = "users.User"
 
 
-if "test" in sys.argv:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",  # in-memory база
-        }
-    }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS':
+        ['django_filters.rest_framework.DjangoFilterBackend'],
+}

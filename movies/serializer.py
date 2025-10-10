@@ -1,17 +1,6 @@
 from rest_framework import serializers
 
-from movies.models import User, Movie
-
-
-class UserSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(source="public_id", read_only=True)
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = ["id", "username", "email", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
+from movies.models import Movie
 
 
 class MovieSerializer(serializers.ModelSerializer):

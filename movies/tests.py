@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from movies.models import User, Movie
-import uuid
+from movies.models import Movie
+from users.models import User
 
 
 class MovieAPITestCase(APITestCase):
@@ -63,7 +63,6 @@ class MovieAPITestCase(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(Movie.objects.filter(pk=self.movie.pk).exists())
-
 
 class UserAPITestCase(APITestCase):
     def setUp(self):
