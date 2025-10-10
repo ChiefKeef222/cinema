@@ -41,6 +41,7 @@ class RegisterViewSet(ViewSet):
             'access': str(refresh.access_token),
         }
         return Response({
+            "message": "Пользователь успешно зарегистрирован",
             'user': serializer.data,
             'refresh': str(refresh),
             'token': res['access']
