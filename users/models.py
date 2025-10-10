@@ -30,7 +30,6 @@ class UserManager(BaseUserManager):
         )
         user.set_password(password)
         user.save(using=self._db)
-
         return user
 
     def create_superuser(self, username, email, password, **kwargs):
@@ -44,20 +43,23 @@ class UserManager(BaseUserManager):
         user = self.create_user(username, email, password, **kwargs)
         user.is_superuser = True
         user.is_staff = True
+        user.role = User.Role.ADMIN
         user.save(using=self._db)
-
         return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    class Role(models.TextChoices):
+        USER = 'user', 'Обычный пользователь'
+        ADMIN = 'admin', 'Администратор'
     public_id = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True, db_index=True
     )
     email = models.EmailField(unique=True, db_index=True)
-    role = models.CharField(
-        max_length=10, choices=[("user", "User"), ("admin", "Admin")], default="user"
-    )
     username = models.CharField(max_length=150, unique=True)
+    role = models.CharField(
+        max_length=10, choices=Role.choices, default=Role.USER
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -74,4 +76,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    def is_admin(self):
+        return self.role == self.Role.ADMIN
+
+    @property
+    def is_user(self):
+        return self.role == self.Role.USER
 
