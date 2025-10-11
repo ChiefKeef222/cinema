@@ -1,29 +1,23 @@
 import sys
 from pathlib import Path
-from common.jwt_config import (
+from apps.common.jwt_config import (
     JWT_SECRET_KEY,
     JWT_ALGORITHM,
     JWT_ACCESS_TOKEN_LIFETIME,
     JWT_REFRESH_TOKEN_LIFETIME,
 )
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR / "apps"))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-4+z1414a*e3)(4!(l=u*qf8dp0pb#gzp^tzh-fn0#px%%)*bkn"
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -32,13 +26,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "movies",
     "rest_framework",
+    "rest_framework_simplejwt",
     "django_filters",
-    'users',
-    'rest_framework_simplejwt',
-    'schedule',
-    'common',
+    "apps.movies",
+    "apps.users",
+    "apps.schedule",
+    "apps.common",
 ]
 
 MIDDLEWARE = [
@@ -71,9 +65,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "cinema.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -85,9 +76,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,9 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "Asia/Almaty"
@@ -117,13 +102,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -132,14 +112,13 @@ AUTH_USER_MODEL = "users.User"
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_FILTER_BACKENDS':
-        ['django_filters.rest_framework.DjangoFilterBackend'],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
-
+# jwt
 SIMPLE_JWT = {
     "SIGNING_KEY": JWT_SECRET_KEY,
     "ALGORITHM": JWT_ALGORITHM,
