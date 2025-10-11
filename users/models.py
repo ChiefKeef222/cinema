@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http.response import Http404
 
 
+
 class UserManager(BaseUserManager):
     def get_object_by_public_id(self, public_id):
         try:

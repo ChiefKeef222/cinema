@@ -1,5 +1,11 @@
 import sys
 from pathlib import Path
+from common.jwt_config import (
+    JWT_SECRET_KEY,
+    JWT_ALGORITHM,
+    JWT_ACCESS_TOKEN_LIFETIME,
+    JWT_REFRESH_TOKEN_LIFETIME,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -131,4 +137,13 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS':
         ['django_filters.rest_framework.DjangoFilterBackend'],
+}
+
+
+SIMPLE_JWT = {
+    "SIGNING_KEY": JWT_SECRET_KEY,
+    "ALGORITHM": JWT_ALGORITHM,
+    "ACCESS_TOKEN_LIFETIME": JWT_ACCESS_TOKEN_LIFETIME,
+    "REFRESH_TOKEN_LIFETIME": JWT_REFRESH_TOKEN_LIFETIME,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
