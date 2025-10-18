@@ -174,3 +174,8 @@ class SessionCRUDTests(TestCase):
         response = self.client.get("/api/schedule/sessions/", {"date": "2100-01-01"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, [])
+
+    def test_filter_session_invalid_uuid(self):
+        response = self.client.get("/api/schedule/sessions/", {"movie": "123"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("UUID", str(response.data))

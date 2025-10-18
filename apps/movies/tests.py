@@ -75,3 +75,11 @@ class MovieCRUDTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["title"], "Avengers")
+
+    def test_search_movie_too_long(self):
+        long_title = "a" * 101
+        response = self.client.get("/api/movies/", {"search": long_title})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Параметр поиска не может быть длиннее 100 символов", str(response.data)
+        )
