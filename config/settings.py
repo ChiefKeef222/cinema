@@ -58,7 +58,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "cinema.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "cinema.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 DATABASES = {
