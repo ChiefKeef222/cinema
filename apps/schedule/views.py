@@ -15,8 +15,8 @@ class HallViewSet(BaseCRUDViewSet):
     message_destroy = "Зал успешно удалён"
 
 class SessionFilter(filters.FilterSet):
-    movie = filters.UUIDFilter(field_name='movie_id__public_id', lookup_expr='exact')
-    hall = filters.UUIDFilter(field_name='hall_id__public_id', lookup_expr='exact')
+    movie = filters.UUIDFilter(field_name='movie_id__public_id')
+    hall = filters.UUIDFilter(field_name='hall_id__public_id')
     date = filters.DateFilter(field_name='start_time', lookup_expr='date')
 
     class Meta:
@@ -24,12 +24,14 @@ class SessionFilter(filters.FilterSet):
         fields = ['movie', 'hall', 'date']
 
 class SessionViewSet(BaseCRUDViewSet):
-    queryset = Session.objects.all()
     serializer_class = SessionSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = SessionFilter
     message_create = "Сеанс успешно создан"
     message_update = "Сеанс успешно обновлён"
     message_destroy = "Сеанс успешно удалён"
+
+    def get_queryset(self):
+        return(Session.objects.select_related('movie_id', 'hall_id').all())
 
 
