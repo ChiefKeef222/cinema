@@ -10,8 +10,6 @@ class Hall(models.Model):
         default=uuid.uuid4, editable=False, unique=True, db_index=True
     )
     name = models.CharField(max_length=255, unique=True, verbose_name="Название зала")
-    rows = models.PositiveIntegerField(verbose_name="Количество рядов")
-    seats_per_row = models.PositiveIntegerField(verbose_name="Количество мест в ряду")
 
     class Meta:
         verbose_name = "Зал"
@@ -19,24 +17,27 @@ class Hall(models.Model):
         ordering = ["id"]
 
     def __str__(self):
-        return f"{self.name} ({self.rows} рядов × {self.seats_per_row} мест)"
+        return f"{self.name}"
 
 
 class Seat(models.Model):
-    hall = models.ForeignKey(Hall, on_delete=models.CASCADE)
+    hall = models.ForeignKey(Hall, related_name='seats', on_delete=models.CASCADE)
     row_number = models.PositiveIntegerField(verbose_name="номер ряда")
     seat_number = models.PositiveIntegerField("Номер места")
 
     class Meta:
+        verbose_name = "Место"
+        verbose_name_plural = "Места"
         constraints = [
             models.UniqueConstraint(
                 fields=["hall", "row_number", "seat_number"],
-                name='unique_hall_row_number'
+                name="unique_hall_row_seat"
             )
         ]
+        ordering = ["hall", "row_number", "seat_number"]
 
     def __str__(self):
-        return f"Зал {self.hall.name}: ряд {self.row}, место {self.number}"
+        return f"Зал {self.hall.name}: ряд {self.row_number}, место {self.seat_number}"
 
 class Session(models.Model):
     id = models.BigAutoField(primary_key=True)

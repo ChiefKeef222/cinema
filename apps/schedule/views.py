@@ -1,7 +1,7 @@
 from apps.common.viewsets import BaseCRUDViewSet
 
 from .serializer import HallSerializer, SessionSerializer
-from .models import Session, Hall
+from .models import Session, Hall, Seat
 
 
 class HallViewSet(BaseCRUDViewSet):
@@ -11,6 +11,7 @@ class HallViewSet(BaseCRUDViewSet):
     message_create = "Зал успешно создан"
     message_update = "Зал успешно обновлён"
     message_destroy = "Зал успешно удалён"
+
 
 
 class SessionViewSet(BaseCRUDViewSet):
