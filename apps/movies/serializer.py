@@ -4,10 +4,12 @@ from .models import Movie
 
 
 class MovieSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="public_id", read_only=True)
+
     class Meta:
         model = Movie
         fields = [
-            "public_id",
+            "id",
             "title",
             "description",
             "duration",

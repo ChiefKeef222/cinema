@@ -11,6 +11,7 @@ class SeatSerializer(serializers.ModelSerializer):
 
 
 class HallSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="public_id", read_only=True)
     rows = serializers.ListField(
         child=serializers.DictField(
             child=serializers.IntegerField(),
@@ -22,7 +23,7 @@ class HallSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hall
-        fields = ('public_id', 'name', 'rows', 'seats')
+        fields = ('id', 'name', 'rows', 'seats')
         read_only_fields = ["seats"]
 
     def create(self, validated_data):
@@ -39,17 +40,18 @@ class HallSerializer(serializers.ModelSerializer):
 
 
 class SessionSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="public_id", read_only=True)
     movie_id = serializers.SlugRelatedField(
-        slug_field="public_id", queryset=Movie.objects.all()  # связываем по UUID фильма
+        slug_field="public_id", queryset=Movie.objects.all()
     )
     hall_id = serializers.SlugRelatedField(
-        slug_field="public_id", queryset=Hall.objects.all()  # связываем по UUID зала
+        slug_field="public_id", queryset=Hall.objects.all()
     )
 
     class Meta:
         model = Session
         fields = [
-            "public_id",
+            "id",
             "movie_id",
             "hall_id",
             "start_time",

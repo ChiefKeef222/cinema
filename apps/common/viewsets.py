@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 
 class BaseCRUDViewSet(viewsets.ModelViewSet):
     lookup_field = "public_id"
+    lookup_url_kwarg = "public_id"
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     message_create = "Объект успешно создан"
