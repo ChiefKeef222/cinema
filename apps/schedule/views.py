@@ -1,7 +1,7 @@
 from apps.common.viewsets import BaseCRUDViewSet
 
 from .serializer import HallSerializer, SessionSerializer
-from .models import Session, Hall, Seat
+from .models import Session, Hall
 
 
 class HallViewSet(BaseCRUDViewSet):
