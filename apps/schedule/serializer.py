@@ -1,13 +1,19 @@
 from rest_framework import serializers
 
-from .models import Hall, Session
+from .models import Hall, Session, Seat
 from apps.movies.models import Movie
+
+
+class SeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seat
+        fields = ['hall', 'row_number', 'seat_number']
 
 
 class HallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hall
-        fields = ["public_id", "name", "rows", "seats_per_row"]
+        fields = ["public_id", "name", "rows", "seats_per_row", "seats"]
         read_only_fields = ["public_id"]
 
 
