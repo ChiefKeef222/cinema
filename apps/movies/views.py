@@ -9,8 +9,7 @@ class MovieViewSet(BaseCRUDViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['title']
-
+    search_fields = ["title"]
 
     message_create = "Фильм успешно создан"
     message_update = "Фильм успешно обновлён"

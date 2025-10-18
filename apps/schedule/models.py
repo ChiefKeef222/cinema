@@ -21,7 +21,7 @@ class Hall(models.Model):
 
 
 class Seat(models.Model):
-    hall = models.ForeignKey(Hall, related_name='seats', on_delete=models.CASCADE)
+    hall = models.ForeignKey(Hall, related_name="seats", on_delete=models.CASCADE)
     row_number = models.PositiveIntegerField(verbose_name="номер ряда")
     seat_number = models.PositiveIntegerField("Номер места")
 
@@ -31,13 +31,14 @@ class Seat(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["hall", "row_number", "seat_number"],
-                name="unique_hall_row_seat"
+                name="unique_hall_row_seat",
             )
         ]
         ordering = ["hall", "row_number", "seat_number"]
 
     def __str__(self):
         return f"Зал {self.hall.name}: ряд {self.row_number}, место {self.seat_number}"
+
 
 class Session(models.Model):
     id = models.BigAutoField(primary_key=True)
