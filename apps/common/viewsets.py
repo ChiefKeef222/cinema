@@ -1,8 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
-from .permissions import IsAdmin
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 
 
 class BaseCRUDViewSet(viewsets.ModelViewSet):
@@ -15,7 +13,7 @@ class BaseCRUDViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            permission_classes = [IsAdmin]
+            permission_classes = [IsAdminUser]
         else:
             permission_classes = [IsAuthenticatedOrReadOnly]
         return [permission() for permission in permission_classes]

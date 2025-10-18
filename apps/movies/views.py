@@ -1,4 +1,4 @@
-from apps.common.views import BaseCRUDViewSet
+from apps.common.viewsets import BaseCRUDViewSet
 
 from .serializer import MovieSerializer
 from .models import Movie

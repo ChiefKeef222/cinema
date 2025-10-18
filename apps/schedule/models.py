@@ -22,6 +22,22 @@ class Hall(models.Model):
         return f"{self.name} ({self.rows} рядов × {self.seats_per_row} мест)"
 
 
+class Seat(models.Model):
+    hall = models.ForeignKey(Hall, on_delete=models.CASCADE)
+    row_number = models.PositiveIntegerField(verbose_name="номер ряда")
+    seat_number = models.PositiveIntegerField("Номер места")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["hall", "row_number", "seat_number"],
+                name='unique_hall_row_number'
+            )
+        ]
+
+    def __str__(self):
+        return f"Зал {self.hall.name}: ряд {self.row}, место {self.number}"
+
 class Session(models.Model):
     id = models.BigAutoField(primary_key=True)
     public_id = models.UUIDField(
@@ -44,4 +60,4 @@ class Session(models.Model):
         ordering = ["start_time"]
 
     def __str__(self):
-        return f"{self.movie.title} — {self.hall.name} ({self.start_time:%d.%m %H:%M})"
+        return f"{self.movie_id.title} — {self.hall_id.name} ({self.start_time:%d.%m %H:%M})"
