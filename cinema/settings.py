@@ -1,20 +1,33 @@
 import sys
 from pathlib import Path
-from apps.common.jwt_config import (
-    JWT_SECRET_KEY,
-    JWT_ALGORITHM,
-    JWT_ACCESS_TOKEN_LIFETIME,
-    JWT_REFRESH_TOKEN_LIFETIME,
+import os
+import environ
+from datetime import timedelta
+
+env = environ.Env(
+    DEBUG=(bool, True),
+    SECRET_KEY=(str),
+    JWT_SECRET_KEY=(str),
+    JWT_ALGORITHM=(str),
+    JWT_ACCESS_TOKEN_LIFETIME=(int),
+    JWT_REFRESH_TOKEN_LIFETIME=(int),
+    DB_NAME=(str),
+    DB_USER=(str),
+    DB_PASSWORD=(str),
+    DB_HOST=(str),
+    DB_PORT=(str),
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "apps"))
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = "django-insecure-4+z1414a*e3)(4!(l=u*qf8dp0pb#gzp^tzh-fn0#px%%)*bkn"
+SECRET_KEY = env('SECRET_KEY')
 
 
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -68,11 +81,11 @@ WSGI_APPLICATION = "cinema.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "cinema_db",
-        "USER": "cinema",
-        "PASSWORD": "Barsik_04",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": env('DB_NAME'),
+        "USER": env('DB_USER'),
+        "PASSWORD": env('DB_PASSWORD'),
+        "HOST": env('DB_HOST'),
+        "PORT": env('DB_PORT'),
     }
 }
 
@@ -119,10 +132,7 @@ REST_FRAMEWORK = {
 }
 
 # jwt
-SIMPLE_JWT = {
-    "SIGNING_KEY": JWT_SECRET_KEY,
-    "ALGORITHM": JWT_ALGORITHM,
-    "ACCESS_TOKEN_LIFETIME": JWT_ACCESS_TOKEN_LIFETIME,
-    "REFRESH_TOKEN_LIFETIME": JWT_REFRESH_TOKEN_LIFETIME,
-    "AUTH_HEADER_TYPES": ("Bearer",),
-}
+JWT_SECRET_KEY = env("JWT_SECRET_KEY")
+JWT_ALGORITHM = env("JWT_ALGORITHM")
+JWT_ACCESS_TOKEN_LIFETIME = timedelta(minutes=int(env("JWT_ACCESS_TOKEN_LIFETIME")))
+JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=int(env("JWT_REFRESH_TOKEN_LIFETIME")))
