@@ -4,6 +4,7 @@ import os
 import environ
 from datetime import timedelta
 
+
 env = environ.Env(
     DEBUG=(bool, True),
     SECRET_KEY=(str),

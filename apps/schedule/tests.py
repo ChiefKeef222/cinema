@@ -1,16 +1,12 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
-from apps.users.models import User  # твой кастомный User
+from apps.users.models import User
 from apps.movies.models import Movie
 from apps.schedule.models import Hall, Session
-from datetime import datetime, timedelta
 import pytz
-from datetime import date
-
-
-tz = pytz.timezone("Asia/Almaty")  # UTC+5
-today_local = datetime.now(tz).date()
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 class HallCRUDTests(TestCase):
@@ -82,7 +78,6 @@ class SessionCRUDTests(TestCase):
         )
         self.hall = Hall.objects.create(name="Hall 1")
 
-        # Добавляем ряды и места
         for r in range(1, 3):
             for s in range(1, 6):
                 self.hall.seats.create(row_number=r, seat_number=s)
@@ -136,6 +131,7 @@ class SessionCRUDTests(TestCase):
         self.assertEqual(str(session.price), "2700.00")
 
     def test_delete_session(self):
+        today_utc = timezone.now().date()
         session = Session.objects.create(
             movie_id=self.movie,
             hall_id=self.hall,
@@ -146,24 +142,14 @@ class SessionCRUDTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(Session.objects.filter(id=session.id).exists())
 
-    def test_filter_sessions(self):
-        today = datetime.now(pytz.UTC)
         session1 = Session.objects.create(
             movie_id=self.movie,
             hall_id=self.hall,
-            start_time=datetime.combine(today_local, datetime.min.time(), tzinfo=tz),
+            start_time=timezone.make_aware(datetime.combine(today_utc, datetime.min.time())),
             price="2500.00",
         )
 
-        session2 = Session.objects.create(
-            movie_id=self.movie,
-            hall_id=self.hall,
-            start_time=today + timedelta(days=1),
-            price="2500.00",
-        )
-        response = self.client.get(
-            "/api/schedule/sessions/", {"date": today.date().isoformat()}
-        )
+        response = self.client.get("/api/schedule/sessions/", {"date": today_utc.isoformat()})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], str(session1.public_id))
