@@ -7,7 +7,6 @@ from .models import Session, Hall, Seat
 
 
 class HallViewSet(BaseCRUDViewSet):
-    # queryset = Hall.objects.all()
     serializer_class = HallSerializer
 
     message_create = "Зал успешно создан"
@@ -23,13 +22,13 @@ class HallViewSet(BaseCRUDViewSet):
 
 
 class SessionFilter(filters.FilterSet):
-    movie = filters.UUIDFilter(field_name="movie_id__public_id")
-    hall = filters.UUIDFilter(field_name="hall_id__public_id")
+    movie_id = filters.UUIDFilter(field_name="movie_id__public_id")
+    hall_id = filters.UUIDFilter(field_name="hall_id__public_id")
     date = filters.DateFilter(field_name="start_time", lookup_expr="date")
 
     class Meta:
         model = Session
-        fields = ["movie", "hall", "date"]
+        fields = ["movie_id", "hall_id", "date"]
 
 
 class SessionViewSet(BaseCRUDViewSet):

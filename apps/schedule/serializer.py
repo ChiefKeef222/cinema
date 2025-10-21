@@ -24,7 +24,7 @@ class HallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hall
         fields = ("id", "name", "rows", "seats")
-        read_only_fields = ["seats"]
+        read_only_fields = ["public_id", "seats"]
 
     def create(self, validated_data):
         rows_data = validated_data.pop("rows")

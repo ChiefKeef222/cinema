@@ -165,3 +165,7 @@ class SessionCRUDTests(TestCase):
         response = self.client.get("/api/schedule/sessions/", {"movie": "123"})
         self.assertEqual(response.status_code, 400)
         self.assertIn("UUID", str(response.data))
+
+    # def test_filter_session(self):
+    #     response = self.client.get("/api/schedule/sessions/", {"movie": "Test Movie"})
+    #     self.assertEqual(response.status_code, 200)
