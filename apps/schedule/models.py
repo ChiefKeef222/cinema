@@ -46,7 +46,10 @@ class Session(models.Model):
         default=uuid.uuid4, editable=False, unique=True, db_index=True
     )
     movie_id = models.ForeignKey(
-        Movie, on_delete=models.CASCADE, related_name="movie_sessions", verbose_name="Фильм"
+        Movie,
+        on_delete=models.CASCADE,
+        related_name="movie_sessions",
+        verbose_name="Фильм",
     )
     hall_id = models.ForeignKey(
         Hall, on_delete=models.CASCADE, related_name="hall_sessions", verbose_name="Зал"

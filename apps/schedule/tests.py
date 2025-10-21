@@ -145,11 +145,15 @@ class SessionCRUDTests(TestCase):
         session1 = Session.objects.create(
             movie_id=self.movie,
             hall_id=self.hall,
-            start_time=timezone.make_aware(datetime.combine(today_utc, datetime.min.time())),
+            start_time=timezone.make_aware(
+                datetime.combine(today_utc, datetime.min.time())
+            ),
             price="2500.00",
         )
 
-        response = self.client.get("/api/schedule/sessions/", {"date": today_utc.isoformat()})
+        response = self.client.get(
+            "/api/schedule/sessions/", {"date": today_utc.isoformat()}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], str(session1.public_id))
@@ -162,10 +166,17 @@ class SessionCRUDTests(TestCase):
         self.assertEqual(response.data, [])
 
     def test_filter_session_invalid_uuid(self):
-        response = self.client.get("/api/schedule/sessions/", {"movie": "123"})
+        response = self.client.get("/api/schedule/sessions/", {"movie_id": "123"})
         self.assertEqual(response.status_code, 400)
         self.assertIn("UUID", str(response.data))
 
-    # def test_filter_session(self):
-    #     response = self.client.get("/api/schedule/sessions/", {"movie": "Test Movie"})
-    #     self.assertEqual(response.status_code, 200)
+    def test_too_long_param(self):
+        long_param = "a" * 101
+        response = self.client.get("/api/schedule/sessions/", {"movie_id": long_param})
+        self.assertEqual(response.status_code, 400)
+        assert "превышает 100 символов" in response.data["detail"]
+
+    def test_filter_invalid_date_format(self):
+        response = self.client.get("/api/schedule/sessions/", {"date": "18-10-2025"})
+        assert response.status_code == 400
+        assert "Неверный формат даты" in response.data["detail"]

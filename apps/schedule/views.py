@@ -53,14 +53,12 @@ class SessionViewSet(BaseCRUDViewSet):
         hall_id = request.query_params.get("hall_id")
         date_str = request.query_params.get("date")
 
-
         for name, value in request.query_params.items():
             if len(value) > 100:
                 return Response(
                     {"detail": f"Параметр '{name}' превышает 100 символов."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
 
         def is_valid_uuid(value):
             try:
@@ -81,19 +79,18 @@ class SessionViewSet(BaseCRUDViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-
         if date_str:
             try:
                 datetime.strptime(date_str, "%Y-%m-%d")
             except ValueError:
                 return Response(
-                    {"detail": "Неверный формат даты. Используйте ISO 8601 (YYYY-MM-DD)."},
+                    {
+                        "detail": "Неверный формат даты. Используйте ISO 8601 (YYYY-MM-DD)."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-
         response = super().list(request, *args, **kwargs)
-
 
         if not response.data:
             return Response([], status=status.HTTP_200_OK)
