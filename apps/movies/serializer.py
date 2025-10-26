@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from .models import Movie
+from apps.common.abstract import AbstractSerializer
 
-
-class MovieSerializer(serializers.ModelSerializer):
+class MovieSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
 
     class Meta:
@@ -17,7 +17,6 @@ class MovieSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["public_id", "created_at", "updated_at"]
 
     def validate_duration(self, value):
         if value <= 0:

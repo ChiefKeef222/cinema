@@ -4,9 +4,10 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import update_last_login
 from .models import User
+from apps.common.abstract import AbstractSerializer
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)

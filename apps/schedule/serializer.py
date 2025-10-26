@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Hall, Session, Seat
 from apps.movies.models import Movie
+from apps.common.abstract import AbstractSerializer
 
 
 class SeatSerializer(serializers.ModelSerializer):
@@ -10,7 +11,7 @@ class SeatSerializer(serializers.ModelSerializer):
         fields = ["row_number", "seat_number"]
 
 
-class HallSerializer(serializers.ModelSerializer):
+class HallSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
     rows = serializers.ListField(
         child=serializers.DictField(
@@ -41,7 +42,7 @@ class HallSerializer(serializers.ModelSerializer):
         return hall
 
 
-class SessionSerializer(serializers.ModelSerializer):
+class SessionSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
     movie_id = serializers.SlugRelatedField(
         slug_field="public_id", queryset=Movie.objects.all()
