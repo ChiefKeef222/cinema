@@ -1,14 +1,12 @@
 from django.db import models
-import uuid
 
 from apps.movies.models import Movie
 
+from apps.common.abstract import AbstractModel
 
-class Hall(models.Model):
+
+class Hall(AbstractModel, models.Model):
     id = models.BigAutoField(primary_key=True)
-    public_id = models.UUIDField(
-        default=uuid.uuid4, editable=False, unique=True, db_index=True
-    )
     name = models.CharField(max_length=255, unique=True, verbose_name="Название зала")
 
     class Meta:
@@ -40,11 +38,8 @@ class Seat(models.Model):
         return f"Зал {self.hall.name}: ряд {self.row_number}, место {self.seat_number}"
 
 
-class Session(models.Model):
+class Session(AbstractModel, models.Model):
     id = models.BigAutoField(primary_key=True)
-    public_id = models.UUIDField(
-        default=uuid.uuid4, editable=False, unique=True, db_index=True
-    )
     movie_id = models.ForeignKey(
         Movie,
         on_delete=models.CASCADE,

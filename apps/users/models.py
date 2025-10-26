@@ -1,21 +1,13 @@
 from django.db import models
-import uuid
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
-from django.core.exceptions import ObjectDoesNotExist
-from django.http.response import Http404
 
+from apps.common.abstract import AbstractModel, AbstractManager
 
-class UserManager(BaseUserManager):
-    def get_object_by_public_id(self, public_id):
-        try:
-            instance = self.get(public_id=public_id)
-            return instance
-        except (ObjectDoesNotExist, ValueError, TypeError):
-            raise Http404("Пользователь не найден")
+class UserManager(BaseUserManager, AbstractManager):
 
     def create_user(self, username, email, password=None, **kwargs):
         if username is None:
@@ -48,21 +40,16 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, AbstractModel):
     class Role(models.TextChoices):
         USER = "user", "Обычный пользователь"
         ADMIN = "admin", "Администратор"
 
-    public_id = models.UUIDField(
-        default=uuid.uuid4, editable=False, unique=True, db_index=True
-    )
     email = models.EmailField(unique=True, db_index=True)
     username = models.CharField(max_length=150, unique=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.USER)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
