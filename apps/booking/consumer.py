@@ -1,9 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+
 class SeatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.session_id = self.scope['url_route']['kwargs']['session_id']
+        self.session_id = self.scope["url_route"]["kwargs"]["session_id"]
         self.group_name = f"session_{self.session_id}"
 
         # Присоединяемся к группе
@@ -16,8 +17,12 @@ class SeatConsumer(AsyncWebsocketConsumer):
 
     # Получение сообщений от группы
     async def seat_update(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "seat_update",
-            "sessionId": event["session_id"],
-            "takenSeats": event["taken_seats"]
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "seat_update",
+                    "sessionId": event["session_id"],
+                    "takenSeats": event["taken_seats"],
+                }
+            )
+        )

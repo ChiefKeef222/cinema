@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.schedule",
     "apps.common",
-    'apps.booking',
+    "apps.booking",
 ]
 
 MIDDLEWARE = [
@@ -151,9 +151,4 @@ INTERNAL_IPS = ["127.0.0.1"]
 ASGI_APPLICATION = "cinema.asgi.application"
 
 
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}

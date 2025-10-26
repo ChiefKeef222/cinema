@@ -9,13 +9,12 @@ from django.utils import timezone
 
 User = get_user_model()
 
+
 class BookingTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            email="testuser@example.com",
-            username="testuser",
-            password="testpass"
+            email="testuser@example.com", username="testuser", password="testpass"
         )
         self.client.force_authenticate(user=self.user)
 
@@ -28,7 +27,7 @@ class BookingTests(TestCase):
             movie_id=self.movie,
             hall_id=self.hall,
             start_time=timezone.now() + timedelta(days=1),
-            price=500
+            price=500,
         )
 
         # Места
@@ -40,8 +39,8 @@ class BookingTests(TestCase):
             "session": str(self.session.public_id),
             "seats": [
                 {"row_number": 1, "seat_number": 1},
-                {"row_number": 1, "seat_number": 2}
-            ]
+                {"row_number": 1, "seat_number": 2},
+            ],
         }
         response = self.client.post("/api/booking/bookings/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -56,8 +55,8 @@ class BookingTests(TestCase):
             "session": str(self.session.public_id),
             "seats": [
                 {"row_number": 1, "seat_number": 1},
-                {"row_number": 1, "seat_number": 2}
-            ]
+                {"row_number": 1, "seat_number": 2},
+            ],
         }
         response = self.client.post("/api/booking/bookings/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

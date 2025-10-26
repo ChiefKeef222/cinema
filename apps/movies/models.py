@@ -3,6 +3,7 @@ import uuid
 
 from apps.common.abstract import AbstractModel
 
+
 class Movie(AbstractModel, models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(

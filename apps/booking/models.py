@@ -7,8 +7,12 @@ from apps.schedule.models import Session, Seat
 
 class Booking(AbstractModel):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='booked_seats')
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='booked_seats')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="booked_seats"
+    )
+    session = models.ForeignKey(
+        Session, on_delete=models.CASCADE, related_name="booked_seats"
+    )
     seats = models.ManyToManyField(Seat, related_name="booked_seats")
 
     class Meta:

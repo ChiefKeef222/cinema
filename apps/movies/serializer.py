@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Movie
 from apps.common.abstract import AbstractSerializer
 
+
 class MovieSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
 

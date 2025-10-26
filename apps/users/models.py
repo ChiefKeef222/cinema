@@ -7,6 +7,7 @@ from django.contrib.auth.models import (
 
 from apps.common.abstract import AbstractModel, AbstractManager
 
+
 class UserManager(BaseUserManager, AbstractManager):
 
     def create_user(self, username, email, password=None, **kwargs):
