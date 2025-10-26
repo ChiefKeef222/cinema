@@ -8,4 +8,5 @@ urlpatterns = [
     path("api/movies/", include("apps.movies.urls")),
     path("api/users/", include("apps.users.urls")),
     path("api/schedule/", include("apps.schedule.urls")),
+    path("api/booking/", include("apps.booking.urls")),
 ]

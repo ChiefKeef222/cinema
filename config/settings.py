@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "debug_toolbar",
     "django_filters",
+    "channels",
     "apps.movies",
     "apps.users",
     "apps.schedule",
     "apps.common",
+    'apps.booking',
 ]
 
 MIDDLEWARE = [
@@ -132,7 +134,9 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "UNAUTHENTICATED_USER": "django.contrib.auth.models.AnonymousUser",
 }
+
 
 # jwt
 JWT_SECRET_KEY = env("JWT_SECRET_KEY")
@@ -142,3 +146,14 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=int(env("JWT_REFRESH_TOKEN_LIFETIME"
 
 
 INTERNAL_IPS = ["127.0.0.1"]
+
+
+ASGI_APPLICATION = "cinema.asgi.application"
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
