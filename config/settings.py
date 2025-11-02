@@ -1,8 +1,9 @@
 import sys
 from pathlib import Path
-import os
+import socket
 import environ
 from datetime import timedelta
+import os
 
 
 env = environ.Env(
@@ -120,7 +121,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -135,6 +137,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "UNAUTHENTICATED_USER": "django.contrib.auth.models.AnonymousUser",
+    "DEFAULT_RENDERER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ),
 }
 
 
@@ -145,10 +151,14 @@ JWT_ACCESS_TOKEN_LIFETIME = timedelta(minutes=int(env("JWT_ACCESS_TOKEN_LIFETIME
 JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=int(env("JWT_REFRESH_TOKEN_LIFETIME")))
 
 
-INTERNAL_IPS = ["127.0.0.1"]
+if DEBUG:
+    import socket
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = ["127.0.0.1"] + [ip[:-1] + "1" for ip in ips]
 
 
-ASGI_APPLICATION = "cinema.asgi.application"
+
+ASGI_APPLICATION = "config.asgi.application"
 
 
 CHANNEL_LAYERS = {"default": {
@@ -159,3 +169,16 @@ CHANNEL_LAYERS = {"default": {
         ],
     }
 }}
+
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
+REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
+
+
+#Cache
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
+    }
+}
+

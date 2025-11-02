@@ -28,6 +28,8 @@ services:
     command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
     ports:
       - "8000:8000"
+    volumes:
+      - static_volume:/app/staticfiles
     depends_on:
       - db
       - redis
@@ -44,3 +46,4 @@ services:
 
 volumes:
   postgres_data:
+  static_volume:
