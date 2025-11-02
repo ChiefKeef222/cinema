@@ -4,6 +4,9 @@ RUN mkdir /app
 
 WORKDIR /app
 
+RUN mkdir -p /app/logs
+
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -28,6 +31,7 @@ COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/pyth
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 WORKDIR /app
+
 
 COPY --chown=appuser:appuser . .
 

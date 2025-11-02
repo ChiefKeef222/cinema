@@ -5,15 +5,29 @@ from django.db import transaction
 from rest_framework.views import APIView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from rest_framework.throttling import UserRateThrottle
 
 from .models import Booking
 from .serializer import BookingCreateSerializer
 from apps.schedule.models import Session, Seat
 
 
+class BookingRateThrottle(UserRateThrottle):
+    scope = 'booking'
+
+
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingCreateSerializer
+    throttle_classes = [BookingRateThrottle]
+    throttle_scope = 'booking'
+
+    # def throttled(self, request, wait):
+    #     return Response(
+    #         {"detail": "Слишком много запросов, попробуйте позже."},
+    #         status=status.HTTP_429_TOO_MANY_REQUESTS
+    #     )
+
 
     def get_permissions(self):
         if self.action == "create":

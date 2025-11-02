@@ -1,8 +1,7 @@
 import sys
 from pathlib import Path
-import socket
 import environ
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
 
 
@@ -54,14 +53,16 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'apps.common.logging_middleware.RequestLoggingMiddleware',
     "django.middleware.security.SecurityMiddleware",
+    'apps.common.logging_middleware.RequestLoggingMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware"
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -141,6 +142,9 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
+    "DEFAULT_THROTTLE_RATES": {
+        "booking": "2/minute",
+    },
 }
 
 
@@ -182,3 +186,47 @@ CACHES = {
     }
 }
 
+
+#Logginq
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '''
+                %(timestamp)s %(log_level)s %(log_message)s %(http_path)s 
+                %(http_method)s %(http_status)s %(name)s %(lineno)d
+            ''',
+            'datefmt': '%Y-%m-%dT%H:%M:%SZ',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': f'logs/cinema_{datetime.now().strftime("%Y%m%d")}.log',
+            'formatter': 'json',
+            'maxBytes': 10485760,
+            'backupCount': 5,
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'cinema': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
