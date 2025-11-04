@@ -13,10 +13,11 @@ from .models import Session, Hall, Seat
 
 class HallViewSet(BaseCRUDViewSet):
     serializer_class = HallSerializer
+    object_verbose_name = "Сеанс"
 
-    message_create = "Зал успешно создан"
-    message_update = "Зал успешно обновлён"
-    message_destroy = "Зал успешно удалён"
+    # message_create = "Зал успешно создан"
+    # message_update = "Зал успешно обновлён"
+    # message_destroy = "Зал успешно удалён"
 
     def get_queryset(self):
         return Hall.objects.prefetch_related(
@@ -40,10 +41,11 @@ class SessionViewSet(BaseCRUDViewSet):
     serializer_class = SessionSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = SessionFilter
+    object_verbose_name = "Сеанс"
 
-    message_create = "Сеанс успешно создан"
-    message_update = "Сеанс успешно обновлён"
-    message_destroy = "Сеанс успешно удалён"
+    # message_create = "Сеанс успешно создан"
+    # message_update = "Сеанс успешно обновлён"
+    # message_destroy = "Сеанс успешно удалён"
 
     def get_queryset(self):
         return Session.objects.select_related("movie_id", "hall_id").all()

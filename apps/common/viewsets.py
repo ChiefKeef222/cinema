@@ -1,16 +1,26 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.exceptions import NotFound
 
 
 class BaseCRUDViewSet(viewsets.ModelViewSet):
     lookup_field = "public_id"
     lookup_url_kwarg = "public_id"
     permission_classes = [IsAuthenticatedOrReadOnly]
+    object_verbose_name = "Объект"
 
-    message_create = "Объект успешно создан"
-    message_update = "Объект успешно обновлён"
-    message_destroy = "Объект успешно удалён"
+    @property
+    def message_create(self):
+        return f"{self.object_verbose_name} успешно создан"
+
+    @property
+    def message_update(self):
+        return f"{self.object_verbose_name} успешно обновлён"
+
+    @property
+    def message_destroy(self):
+        return f"{self.object_verbose_name} успешно удалён"
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
@@ -18,6 +28,12 @@ class BaseCRUDViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticatedOrReadOnly]
         return [permission() for permission in permission_classes]
+
+    def get_object(self):
+        try:
+            return super().get_object()
+        except Exception:
+            raise NotFound(f"{self.object_verbose_name} не найден")
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

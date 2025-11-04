@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "debug_toolbar",
     "django_filters",
+    "drf_standardized_errors",
     "channels",
     "apps.movies",
     "apps.users",
@@ -53,16 +54,16 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'apps.common.logging_middleware.RequestLoggingMiddleware',
+    "apps.common.logging_middleware.RequestLoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    'apps.common.logging_middleware.RequestLoggingMiddleware',
+    "apps.common.logging_middleware.RequestLoggingMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware"
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -145,6 +146,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "booking": "2/minute",
     },
+    "EXCEPTION_HANDLER": "apps.common.exception.custom_exception_handler",
 }
 
 
@@ -157,28 +159,31 @@ JWT_REFRESH_TOKEN_LIFETIME = timedelta(days=int(env("JWT_REFRESH_TOKEN_LIFETIME"
 
 if DEBUG:
     import socket
+
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = ["127.0.0.1"] + [ip[:-1] + "1" for ip in ips]
-
 
 
 ASGI_APPLICATION = "config.asgi.application"
 
 
-CHANNEL_LAYERS = {"default": {
-    "BACKEND": "channels_redis.core.RedisChannelLayer",
-    "CONFIG": {
-        "hosts": [
-                    ("redis", 6379),
-        ],
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                ("redis", 6379),
+            ],
+        },
     }
-}}
+}
+
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
 REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
 
 
-#Cache
+# Cache
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -187,46 +192,43 @@ CACHES = {
 }
 
 
-#Logginq
+# Logginq
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-
-    'formatters': {
-        'json': {
-            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
-            'format': '''
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": """
                 %(timestamp)s %(log_level)s %(log_message)s %(http_path)s 
                 %(http_method)s %(http_status)s %(name)s %(lineno)d
-            ''',
-            'datefmt': '%Y-%m-%dT%H:%M:%SZ',
+            """,
+            "datefmt": "%Y-%m-%dT%H:%M:%SZ",
         },
     },
-
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'json',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': f'logs/cinema_{datetime.now().strftime("%Y%m%d")}.log',
-            'formatter': 'json',
-            'maxBytes': 10485760,
-            'backupCount': 5,
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f'logs/cinema_{datetime.now().strftime("%Y%m%d")}.log',
+            "formatter": "json",
+            "maxBytes": 10485760,
+            "backupCount": 5,
         },
     },
-
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
         },
-        'cinema': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
+        "cinema": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }

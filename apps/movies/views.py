@@ -13,6 +13,7 @@ from .models import Movie
 local_cache = {}
 LOCAL_TTL = 60
 
+
 def safe_cache_get(key):
     try:
         value = cache.get(key)
@@ -30,6 +31,7 @@ def safe_cache_get(key):
             del local_cache[key]
     return None
 
+
 def safe_cache_set(key, value):
     try:
         cache.set(key, value, LOCAL_TTL)
@@ -42,6 +44,7 @@ class MovieViewSet(BaseCRUDViewSet):
     serializer_class = MovieSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["title"]
+    object_verbose_name = "Фильм"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -50,9 +53,9 @@ class MovieViewSet(BaseCRUDViewSet):
             raise ValidationError("Параметр поиска не может быть длиннее 100 символов.")
         return queryset
 
-    message_create = "Фильм успешно создан"
-    message_update = "Фильм успешно обновлён"
-    message_destroy = "Фильм успешно удалён"
+    # message_create = "Фильм успешно создан"
+    # message_update = "Фильм успешно обновлён"
+    # message_destroy = "Фильм успешно удалён"
 
     @method_decorator(cache_page(60))
     def list(self, request, *args, **kwargs):
@@ -67,6 +70,7 @@ class MovieViewSet(BaseCRUDViewSet):
 
     def get_response(self, data):
         from rest_framework.response import Response
+
         return Response(data)
 
     def create(self, request, *args, **kwargs):
