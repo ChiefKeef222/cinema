@@ -68,6 +68,7 @@ class MovieViewSet(BaseCRUDViewSet):
 
     def get_response(self, data):
         from rest_framework.response import Response
+
         return Response(data)
 
     def create(self, request, *args, **kwargs):

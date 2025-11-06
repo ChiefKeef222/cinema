@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from django.urls import reverse
 from datetime import datetime, timedelta
 import pytz
+from django.utils import timezone
 
 from apps.movies.models import Movie
 from apps.users.models import User
@@ -27,9 +28,9 @@ class BookingViewSetTests(TestCase):
         )
 
         self.session = Session.objects.create(
-            movie_id=self.movie,
-            hall_id=self.hall,
-            start_time=datetime.now(pytz.UTC) + timedelta(days=1),
+            movie=self.movie,
+            hall=self.hall,
+            start_time=timezone.now() + timedelta(days=1),
             price="2500.00",
         )
 

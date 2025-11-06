@@ -7,13 +7,13 @@ from apps.users.models import User
 
 class MovieCRUDTests(TestCase):
     def setUp(self):
-        self.client = APIClient()
         self.movie_data = {
             "title": "Test Movie",
             "description": "Описание тестового фильма",
             "duration": 120,
             "poster_url": "http://example.com/poster.jpg",
         }
+        self.client = APIClient()
         self.admin = User.objects.create_superuser(
             username="admin", password="admin123", email="admin@example.com"
         )
