@@ -2,7 +2,6 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from apps.movies.models import Movie
-import uuid
 from apps.users.models import User
 
 
@@ -58,6 +57,7 @@ class MovieCRUDTests(TestCase):
         self.assertFalse(Movie.objects.filter(public_id=movie.public_id).exists())
 
     def test_search_movie(self):
+        Movie.objects.all().delete()
         Movie.objects.create(
             title="Avengers",
             description="Hero movie",
