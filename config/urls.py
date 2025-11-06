@@ -7,10 +7,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("__debug__/", include(debug_toolbar.urls)),
     path("admin/", admin.site.urls),
-    path("api/movies/", include("apps.movies.urls")),
-    path("api/users/", include("apps.users.urls")),
-    path("api/schedule/", include("apps.schedule.urls")),
-    path("api/booking/", include("apps.booking.urls")),
+    path("api/", include("apps.common.api_router")),
+    path(
+        "api/sessions/<uuid:session_id>/seats/",
+        include("apps.booking.urls_extra"),
+    ),
 ]
 
 if settings.DEBUG:
