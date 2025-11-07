@@ -54,7 +54,8 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("error", response.data)
         self.assertEqual(
-            response.data["error"], "Не найдено активной учетной записи с указанными данными"
+            response.data["error"],
+            "Не найдено активной учетной записи с указанными данными",
         )
 
     def test_refresh_token_success(self):
@@ -72,6 +73,4 @@ class UserAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("error", response.data)
-        self.assertEqual(
-            response.data["error"], 'Token is invalid'
-        )
+        self.assertEqual(response.data["error"], "Token is invalid")

@@ -31,20 +31,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
-    # def get_throttles(self):
-    #     if self.action == "post":
-    #         return [throttle() for throttle in self.throttle_classes]
-    #     return []
     def get_throttles(self):
         if self.request.method.lower() == "post":
             return [BookingRateThrottle()]
         return []
-    # def throttled(self, request, wait):
-    #     raise Throttled(
-    #         detail={
-    #             "detail": f"Слишком много бронирований. Попробуйте снова через {int(wait)} секунд."
-    #         }
-    #     )
 
     def list(self, request):
         if not request.user.is_authenticated:

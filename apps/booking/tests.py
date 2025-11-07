@@ -17,31 +17,25 @@ class BookingViewSetTests(TestCase):
         cache.clear()
         self.client = APIClient()
 
-        # Пользователь
         self.user = User.objects.create_user(
-            email="user@example.com",
-            username="user",
-            password="test123"
+            email="user@example.com", username="user", password="test123"
         )
 
-        # Зал и фильм
         self.hall = Hall.objects.create(name="Main Hall")
         self.movie = Movie.objects.create(
             title="Test Movie",
             description="Описание тестового фильма",
             duration=120,
-            poster_url="http://example.com/poster.jpg"
+            poster_url="http://example.com/poster.jpg",
         )
 
-        # Сессия
         self.session = Session.objects.create(
             movie_id=self.movie,
             hall_id=self.hall,
             start_time=timezone.now() + timedelta(days=1),
-            price="2500.00"
+            price="2500.00",
         )
 
-        # Сиденья
         self.seat1 = Seat.objects.create(hall=self.hall, row_number=1, seat_number=1)
         self.seat2 = Seat.objects.create(hall=self.hall, row_number=1, seat_number=2)
 
@@ -110,7 +104,9 @@ class BookingViewSetTests(TestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 401)
         self.assertIn("error", response.data)
-        self.assertEqual(response.data["error"], "Учетные данные не были предоставлены.")
+        self.assertEqual(
+            response.data["error"], "Учетные данные не были предоставлены."
+        )
         self.assertEqual(Booking.objects.count(), 0)
 
 
@@ -121,40 +117,40 @@ class BookingThrottleTest(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-        # Зал, фильм и сессия
         self.hall = Hall.objects.create(name="Main Hall")
         self.movie = Movie.objects.create(
             title="Test Movie",
             description="Описание тестового фильма",
             duration=120,
-            poster_url="http://example.com/poster.jpg"
+            poster_url="http://example.com/poster.jpg",
         )
         self.session = Session.objects.create(
             movie_id=self.movie,
             hall_id=self.hall,
             start_time=timezone.now() + timedelta(days=1),
-            price="2500.00"
+            price="2500.00",
         )
 
-        # Сиденья
         self.seat1 = Seat.objects.create(hall=self.hall, row_number=1, seat_number=1)
         self.seat2 = Seat.objects.create(hall=self.hall, row_number=1, seat_number=2)
 
-        # URL и данные
         self.url = reverse("booking-list")
-        self.data1 = {"session": str(self.session.public_id), "seats": [{"row_number": 1, "seat_number": 1}]}
-        self.data2 = {"session": str(self.session.public_id), "seats": [{"row_number": 1, "seat_number": 2}]}
+        self.data1 = {
+            "session": str(self.session.public_id),
+            "seats": [{"row_number": 1, "seat_number": 1}],
+        }
+        self.data2 = {
+            "session": str(self.session.public_id),
+            "seats": [{"row_number": 1, "seat_number": 2}],
+        }
 
     def test_booking_post_throttle(self):
-        # 1-й POST — успешно
         response1 = self.client.post(self.url, self.data1, format="json")
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
-        # 2-й POST — успешно
         response2 = self.client.post(self.url, self.data2, format="json")
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
 
-        # 3-й POST — должен троттлить
         response3 = self.client.post(self.url, self.data2, format="json")
         self.assertEqual(response3.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
         self.assertIn("error", response3.data)  # вместо "detail"

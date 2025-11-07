@@ -11,15 +11,15 @@ from rest_framework.throttling import UserRateThrottle
 from .serializer import UserSerializer, RegisterSerializer, LoginSerializer
 from .models import User
 
+
 class BookingRateThrottle(UserRateThrottle):
     scope = "user"
+
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "patch", "put"]
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
-
-
 
 
 class RegisterViewSet(ViewSet):
