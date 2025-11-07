@@ -111,6 +111,6 @@ class BookingViewSetTests(TestCase):
         response = self.client.post(url, data, format="json")
 
         self.assertEqual(response.status_code, 401)
-        self.assertIn("detail", response.data)
-        self.assertEqual(response.data["detail"].lower(), "authentication credentials were not provided.")
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Учетные данные не были предоставлены.")
         self.assertEqual(Booking.objects.count(), 0)
