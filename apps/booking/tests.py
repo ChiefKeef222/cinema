@@ -99,3 +99,19 @@ class BookingViewSetTests(TestCase):
         self.assertEqual(len(response.data["takenSeats"]), 1)
         self.assertEqual(response.data["takenSeats"][0]["row"], 1)
         self.assertEqual(response.data["takenSeats"][0]["seat"], 1)
+
+    def test_create_booking_unauthenticated_user_forbidden(self):
+        url = reverse("booking-list")
+        data = {
+            "session": str(self.session.public_id),
+            "seats": [
+                {"row_number": 1, "seat_number": 1},
+            ],
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("detail", response.data)
+        self.assertEqual(response.data["detail"].lower(), "authentication credentials were not provided.")
+        self.assertEqual(Booking.objects.count(), 0)

@@ -145,9 +145,10 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
     "DEFAULT_THROTTLE_CLASSES": [
-        "apps.booking.throttles.BookingRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
+        "user": "1000/day",
         "booking": "2/minute",
     },
     "EXCEPTION_HANDLER": "apps.common.exception.custom_exception_handler",

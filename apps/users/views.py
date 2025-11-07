@@ -6,25 +6,20 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.throttling import UserRateThrottle
 
 from .serializer import UserSerializer, RegisterSerializer, LoginSerializer
 from .models import User
 
+class BookingRateThrottle(UserRateThrottle):
+    scope = "user"
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "patch", "put"]
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
 
-    def get_queryset(self):
-        if self.request.user.is_superuser:
-            return User.objects.all()
-        return User.objects.exclude(is_superuser=True)
 
-    def get_object(self):
-        obj = User.objects.get_object_by_public_id(self.kwargs["pk"])
-        self.check_object_permissions(self.request, obj)
-        return obj
 
 
 class RegisterViewSet(ViewSet):
