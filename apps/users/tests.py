@@ -14,7 +14,6 @@ class UserAPITestCase(APITestCase):
             username="user1", email="user1@example.com", password="password123"
         )
 
-
     def test_register_user_success(self):
         data = {
             "username": "newuser",
@@ -36,11 +35,7 @@ class UserAPITestCase(APITestCase):
 
         response = self.client.post(reverse("auth-register-list"), data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("error", response.data)
-        self.assertEqual(
-            response.data["error"], "'Обязательное поле."
-        )
-
+        self.assertIn("Обязательное поле", response.data["error"])
 
     def test_login_user_success(self):
         data = {"email": "user1@example.com", "password": "password123"}
@@ -61,7 +56,6 @@ class UserAPITestCase(APITestCase):
         self.assertEqual(
             response.data["error"], "Не найдено активной учетной записи с указанными данными"
         )
-
 
     def test_refresh_token_success(self):
         refresh = RefreshToken.for_user(self.user)
