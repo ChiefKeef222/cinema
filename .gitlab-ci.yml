@@ -1,0 +1,39 @@
+stages:
+  - test
+  - build
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+
+test:
+  stage: test
+  image: python:3.13
+  services:
+    - postgres:17
+    - redis:7
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: user
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST: postgres
+  before_script:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - black --check .
+    - python manage.py test
+  only:
+    - main
+    - dev
+
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t cinema-api .
+  only:
+    - main
