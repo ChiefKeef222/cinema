@@ -4,6 +4,10 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.core.validators import EmailValidator
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
 
 from apps.common.abstract import AbstractModel, AbstractManager
 
@@ -17,6 +21,16 @@ class UserManager(BaseUserManager, AbstractManager):
             raise TypeError("Пользователь должен иметь имейл")
         if password is None:
             raise TypeError("Пользователь должен иметь пароль")
+
+        email_validator = EmailValidator(
+            message="Введите корректный адрес электронной почты"
+        )
+        email_validator(email)
+
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            raise ValidationError({"password": e.messages})
 
         user = self.model(
             username=username, email=self.normalize_email(email), **kwargs
@@ -32,6 +46,12 @@ class UserManager(BaseUserManager, AbstractManager):
             raise TypeError("Суперпользователь должен иметь имейл")
         if username is None:
             raise TypeError("Суперпользователь должен иметь никнейм")
+
+        email_validator = EmailValidator(
+            message="Введите корректный адрес электронной почты"
+        )
+        email_validator(email)
+        validate_password(password)
 
         user = self.create_user(username, email, password, **kwargs)
         user.is_superuser = True

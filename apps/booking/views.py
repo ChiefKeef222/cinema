@@ -1,12 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import transaction
-from rest_framework.views import APIView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from rest_framework.throttling import UserRateThrottle
-from rest_framework.exceptions import Throttled
+from rest_framework.views import APIView
 
 from .models import Booking
 from .serializer import BookingCreateSerializer
@@ -17,12 +16,15 @@ class BookingRateThrottle(UserRateThrottle):
     scope = "booking"
 
 
-class BookingViewSet(viewsets.ModelViewSet):
+class BookingViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Booking.objects.all()
     serializer_class = BookingCreateSerializer
-    http_method_names = ["get", "post"]
-    # throttle_classes = [BookingRateThrottle]
     throttle_scope = "booking"
+    http_method_names = ["get", "post"]
 
     def get_permissions(self):
         if self.action == "create":
@@ -132,7 +134,7 @@ class SessionSeatsView(APIView):
             session = Session.objects.get(public_id=session_id)
         except Session.DoesNotExist:
             return Response(
-                {"error": "Сеансне найден"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Сеанс не найден"}, status=status.HTTP_404_NOT_FOUND
             )
 
         booked_seats = Seat.objects.filter(booked_seats__session=session).distinct()

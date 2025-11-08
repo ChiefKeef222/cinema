@@ -8,10 +8,10 @@ from apps.users.models import User
 class UserAPITestCase(APITestCase):
     def setUp(self):
         self.admin = User.objects.create_superuser(
-            username="admin", email="admin@example.com", password="password123"
+            username="admin", email="admin@example.com", password="04091998Aa"
         )
         self.user = User.objects.create_user(
-            username="user1", email="user1@example.com", password="password123"
+            username="user1", email="user1@example.com", password="04091998Aa"
         )
 
     def test_register_user_success(self):
@@ -38,7 +38,7 @@ class UserAPITestCase(APITestCase):
         self.assertIn("Обязательное поле", response.data["error"])
 
     def test_login_user_success(self):
-        data = {"email": "user1@example.com", "password": "password123"}
+        data = {"email": "user1@example.com", "password": "04091998Aa"}
         response = self.client.post(reverse("auth-login-list"), data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -1,8 +1,12 @@
 import sys
-from pathlib import Path
-import environ
-from datetime import timedelta, datetime
 import os
+from pathlib import Path
+from datetime import timedelta, datetime
+import environ
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR / "apps"))
 
 
 env = environ.Env(
@@ -19,16 +23,15 @@ env = environ.Env(
     DB_PORT=(str),
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(str(BASE_DIR / "apps"))
 
-# Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
 
 SECRET_KEY = env("SECRET_KEY")
 
 
 DEBUG = env("DEBUG")
+
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -55,7 +58,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "apps.common.logging_middleware.RequestLoggingMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "apps.common.logging_middleware.RequestLoggingMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -68,6 +70,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
 
 TEMPLATES = [
     {
@@ -83,6 +86,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -129,6 +133,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
 # user
 AUTH_USER_MODEL = "users.User"
@@ -238,3 +243,16 @@ LOGGING = {
         },
     },
 }
+
+# Validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]

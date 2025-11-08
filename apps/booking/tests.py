@@ -18,7 +18,7 @@ class BookingViewSetTests(TestCase):
         self.client = APIClient()
 
         self.user = User.objects.create_user(
-            email="user@example.com", username="user", password="test123"
+            email="user@example.com", username="user", password="04091998Aa"
         )
 
         self.hall = Hall.objects.create(name="Main Hall")
@@ -113,7 +113,7 @@ class BookingViewSetTests(TestCase):
 class BookingThrottleTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username="user1", email="user1@example.com", password="password123"
+            username="user1", email="user1@example.com", password="04091998Aa"
         )
         self.client.force_authenticate(user=self.user)
 

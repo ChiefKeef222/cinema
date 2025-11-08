@@ -14,7 +14,7 @@ class BookingViewSetTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            email="user@example.com", username="user", password="test123"
+            email="user@example.com", username="user", password="04091998Aa"
         )
 
         self.hall = Hall.objects.create(name="Main Hall")

@@ -15,7 +15,7 @@ class MovieCRUDTests(TestCase):
         }
         self.client = APIClient()
         self.admin = User.objects.create_superuser(
-            username="admin", password="admin123", email="admin@example.com"
+            username="admin", password="04091998Aa", email="admin@example.com"
         )
         self.client.force_authenticate(user=self.admin)
 

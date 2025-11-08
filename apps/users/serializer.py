@@ -5,6 +5,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import update_last_login
 from .models import User
 from apps.common.abstract import AbstractSerializer
+from django.contrib.auth.password_validation import validate_password
+from django.core.validators import EmailValidator
 
 
 class UserSerializer(AbstractSerializer, serializers.ModelSerializer):
@@ -22,10 +24,18 @@ class RegisterSerializer(UserSerializer):
     password = serializers.CharField(
         max_length=128, min_length=8, write_only=True, required=True
     )
+    email = serializers.EmailField(validators=[EmailValidator()])
 
     class Meta:
         model = User
         fields = ["id", "username", "email", "password"]
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)

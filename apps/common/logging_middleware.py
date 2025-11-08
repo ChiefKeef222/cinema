@@ -16,14 +16,13 @@ class RequestLoggingMiddleware:
 
         duration = time.time() - start_time
 
-        # ИСПРАВЛЕНО: используем уникальные имена полей
         log_data = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "log_level": "INFO",  # вместо level
-            "log_message": "Request processed",  # вместо message
-            "http_method": request.method,  # вместо method
-            "http_path": request.path,  # вместо path
-            "http_status": response.status_code,  # вместо statusCode
+            "log_level": "INFO",
+            "log_message": "Request processed",
+            "http_method": request.method,
+            "http_path": request.path,
+            "http_status": response.status_code,
             "duration_sec": round(duration, 4),
             "user_agent": request.META.get("HTTP_USER_AGENT", ""),
             "ip_address": self.get_client_ip(request),
