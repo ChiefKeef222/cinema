@@ -5,8 +5,7 @@ from apps.movies.models import Movie
 from apps.common.abstract import AbstractModel
 
 
-class Hall(AbstractModel, models.Model):
-    id = models.BigAutoField(primary_key=True)
+class Hall(AbstractModel):
     name = models.CharField(max_length=255, unique=True, verbose_name="Название зала")
 
     class Meta:
@@ -38,8 +37,7 @@ class Seat(models.Model):
         return f"Зал {self.hall.name}: ряд {self.row_number}, место {self.seat_number}"
 
 
-class Session(AbstractModel, models.Model):
-    id = models.BigAutoField(primary_key=True)
+class Session(AbstractModel):
     movie_id = models.ForeignKey(
         Movie,
         on_delete=models.CASCADE,
