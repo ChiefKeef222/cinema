@@ -93,6 +93,5 @@ CI/CD
  - Python, Django, Django REST Framework
  - PostgreSQL
  - Redis
- - Celery
  - Docker
  - Swagger / drf-yasg
