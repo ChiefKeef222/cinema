@@ -9,6 +9,8 @@ from apps.users.models import User
 from apps.schedule.models import Hall, Session, Seat
 from apps.booking.models import Booking
 
+LOCAL_TZ = pytz.timezone("Asia/Almaty")  # UTC+5
+
 
 class BookingViewSetTests(TestCase):
     def setUp(self):
@@ -27,8 +29,8 @@ class BookingViewSetTests(TestCase):
         )
 
         self.session = Session.objects.create(
-            movie_id=self.movie,
-            hall_id=self.hall,
+            movie=self.movie,
+            hall=self.hall,
             start_time=datetime.now(pytz.UTC) + timedelta(days=1),
             price="2500.00",
         )
@@ -50,7 +52,7 @@ class BookingViewSetTests(TestCase):
         response = self.client.post(url, data, format="json")
 
         self.assertEqual(response.status_code, 201)
-        self.assertIn("booking_id", response.data)
+        self.assertIn("id", response.data)
         self.assertEqual(Booking.objects.count(), 1)
 
         booking = Booking.objects.first()
@@ -71,8 +73,8 @@ class BookingViewSetTests(TestCase):
         response = self.client.post(url, data, format="json")
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Некоторые места уже заняты", response.data["error"])
-        self.assertIn("taken", response.data)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Некоторые места уже заняты")
 
     def test_get_user_bookings(self):
         self.client.force_authenticate(user=self.user)
@@ -84,7 +86,13 @@ class BookingViewSetTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["session"], str(self.session.public_id))
+
+        expected_start = self.session.start_time.astimezone(LOCAL_TZ).isoformat()
+        self.assertEqual(response.data[0]["session_start"], expected_start)
+
+        self.assertEqual(response.data[0]["session_title"], self.session.movie.title)
+        self.assertIn("seats", response.data[0])
+        self.assertEqual(response.data[0]["seats"][0]["row_number"], 1)
 
     def test_get_taken_seats_for_session(self):
         booking = Booking.objects.create(user=self.user, session=self.session)
@@ -96,5 +104,5 @@ class BookingViewSetTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("takenSeats", response.data)
         self.assertEqual(len(response.data["takenSeats"]), 1)
-        self.assertEqual(response.data["takenSeats"][0]["row"], 1)
-        self.assertEqual(response.data["takenSeats"][0]["seat"], 1)
+        self.assertEqual(response.data["takenSeats"][0]["row_number"], 1)
+        self.assertEqual(response.data["takenSeats"][0]["seat_number"], 1)

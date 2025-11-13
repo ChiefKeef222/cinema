@@ -24,13 +24,13 @@ class HallViewSet(BaseCRUDViewSet):
 
 
 class SessionFilter(filters.FilterSet):
-    movie_id = filters.UUIDFilter(field_name="movie_id__public_id")
-    hall_id = filters.UUIDFilter(field_name="hall_id__public_id")
+    movie = filters.UUIDFilter(field_name="movie__public")
+    hall = filters.UUIDFilter(field_name="hall__public")
     date = filters.DateFilter(field_name="start_time", lookup_expr="date")
 
     class Meta:
         model = Session
-        fields = ["movie_id", "hall_id", "date"]
+        fields = ["movie", "hall", "date"]
 
 
 class SessionViewSet(BaseCRUDViewSet):
@@ -40,11 +40,11 @@ class SessionViewSet(BaseCRUDViewSet):
     object_verbose_name = "Сеанс"
 
     def get_queryset(self):
-        return Session.objects.select_related("movie_id", "hall_id").all()
+        return Session.objects.select_related("movie", "hall").all()
 
     def list(self, request, *args, **kwargs):
-        movie_id = request.query_params.get("movie_id")
-        hall_id = request.query_params.get("hall_id")
+        movie = request.query_params.get("movie")
+        hall = request.query_params.get("hall")
         date_str = request.query_params.get("date")
 
         for name, value in request.query_params.items():
@@ -61,15 +61,15 @@ class SessionViewSet(BaseCRUDViewSet):
             except (ValueError, TypeError):
                 return False
 
-        if movie_id and not is_valid_uuid(movie_id):
+        if movie and not is_valid_uuid(movie):
             return Response(
-                {"detail": "Параметр 'movie_id' должен быть UUID."},
+                {"detail": "Параметр 'movie' должен быть UUID."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if hall_id and not is_valid_uuid(hall_id):
+        if hall and not is_valid_uuid(hall):
             return Response(
-                {"detail": "Параметр 'hall_id' должен быть UUID."},
+                {"detail": "Параметр 'hall' должен быть UUID."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

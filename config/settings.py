@@ -211,7 +211,7 @@ LOGGING = {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
             "format": """
-                %(timestamp)s %(log_level)s %(log_message)s %(http_path)s 
+                %(timestamp)s %(log_level)s %(log_message)s %(http_path)s
                 %(http_method)s %(http_status)s %(name)s %(lineno)d
             """,
             "datefmt": "%Y-%m-%dT%H:%M:%SZ",
@@ -224,7 +224,7 @@ LOGGING = {
         },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": f'logs/cinema_{datetime.now().strftime("%Y%m%d")}.log',
+            "filename": f"logs/cinema_{datetime.now().strftime('%Y%m%d')}.log",
             "formatter": "json",
             "maxBytes": 10485760,
             "backupCount": 5,

@@ -1,8 +1,8 @@
 from rest_framework.routers import DefaultRouter
 from apps.movies.views import MovieViewSet
 from apps.schedule.views import HallViewSet, SessionViewSet
-from apps.booking.views import BookingViewSet
 from apps.users.views import RegisterViewSet, LoginViewSet, RefreshViewSet
+from apps.booking.views import BookingViewSet
 
 router = DefaultRouter()
 

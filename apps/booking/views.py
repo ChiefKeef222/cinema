@@ -1,129 +1,134 @@
-from rest_framework import mixins, viewsets, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.utils import timezone
 from django.db import transaction
+from rest_framework import status, viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from rest_framework.throttling import UserRateThrottle
-from rest_framework.views import APIView
 
-from .models import Booking
-from .serializer import BookingCreateSerializer
+
+from apps.booking.models import Booking, Payment, BookingStatus, PaymentStatus
 from apps.schedule.models import Session, Seat
+from .serializer import (
+    BookingCreateSerializer,
+    BookingListSerializer,
+    PaymentSerializer,
+)
 
 
-class BookingRateThrottle(UserRateThrottle):
-    scope = "booking"
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.select_related("session", "user").prefetch_related(
+        "seats"
+    )
+    permission_classes = [permissions.IsAuthenticated]
 
-
-class BookingViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet,
-):
-    queryset = Booking.objects.all()
-    serializer_class = BookingCreateSerializer
-    throttle_scope = "booking"
-    http_method_names = ["get", "post"]
-
-    def get_permissions(self):
+    def get_serializer_class(self):
         if self.action == "create":
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [AllowAny]
-        return [permission() for permission in permission_classes]
+            return BookingCreateSerializer
+        return BookingListSerializer
 
-    def get_throttles(self):
-        if self.request.method.lower() == "post":
-            return [BookingRateThrottle()]
-        return []
-
-    def list(self, request):
-        if not request.user.is_authenticated:
-            return Response([], status=status.HTTP_200_OK)
-
-        bookings = Booking.objects.filter(user=request.user).prefetch_related(
-            "seats", "session"
-        )
-        data = []
-        for b in bookings:
-            seats_list = [
-                {"row_number": s.row_number, "seat_number": s.seat_number}
-                for s in b.seats.all()
-            ]
-            data.append(
-                {
-                    "id": b.id,
-                    "session": str(b.session.public_id),
-                    "seats": seats_list,
-                    "created_at": b.created_at,
-                }
-            )
-        return Response(data)
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
 
     @transaction.atomic
-    def create(self, request):
-        serializer = BookingCreateSerializer(data=request.data)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
+        booking = serializer.save()
 
-        session_uuid = serializer.validated_data["session"]
-        seat_coords = serializer.validated_data["seats"]
-
-        try:
-            session = Session.objects.get(public_id=session_uuid)
-        except Session.DoesNotExist:
-            return Response(
-                {"error": "Сеанс не найден"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        hall_seats = []
-        for coord in seat_coords:
-            try:
-                seat = Seat.objects.get(
-                    hall=session.hall_id,
-                    row_number=coord["row_number"],
-                    seat_number=coord["seat_number"],
-                )
-                hall_seats.append(seat)
-            except Seat.DoesNotExist:
-                return Response(
-                    {
-                        "error": f"Место ряд={coord['row_number']}, номер={coord['seat_number']} не существует"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        already_booked = Booking.objects.filter(session=session, seats__in=hall_seats)
-        if already_booked.exists():
-            taken = []
-            for b in already_booked:
-                for s in b.seats.all():
-                    taken.append(
-                        {"row_number": s.row_number, "seat_number": s.seat_number}
-                    )
-            return Response(
-                {"error": "Некоторые места уже заняты", "taken": taken},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        booking = Booking.objects.create(session=session, user=request.user)
-        booking.seats.add(*hall_seats)
+        booking.expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        booking.save()
 
         channel_layer = get_channel_layer()
-        taken_seats = [{"row": s.row_number, "seat": s.seat_number} for s in hall_seats]
+        taken_seats = [
+            {"row_number": s.row_number, "seat_number": s.seat_number}
+            for s in booking.seats.all()
+        ]
+
         async_to_sync(channel_layer.group_send)(
-            f"session_{session.public_id}",
+            f"session_{booking.session.public_id}",
             {
                 "type": "seat_update",
-                "session_id": str(session.public_id),
+                "session_id": str(booking.session.public_id),
                 "taken_seats": taken_seats,
             },
         )
 
+        output = BookingListSerializer(booking)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="cancel")
+    def cancel_booking(self, request, pk=None):
+        booking = self.get_object()
+        if booking.status in [BookingStatus.CONFIRMED, BookingStatus.PENDING]:
+            booking.status = BookingStatus.CANCELLED
+            booking.save(update_fields=["status"])
+            return Response({"detail": "Бронь успешно отменена."})
         return Response(
-            {"message": "Бронирование успешно создано", "booking_id": booking.id},
-            status=status.HTTP_201_CREATED,
+            {"detail": "Бронь нельзя отменить."}, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class PaymentAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, booking_id):
+        try:
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+        except Booking.DoesNotExist:
+            return Response(
+                {"error": "Бронь не найдена."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if booking.status == BookingStatus.CANCELLED:
+            return Response(
+                {"error": "Эта бронь уже отменена."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if booking.status == BookingStatus.CONFIRMED:
+            return Response(
+                {"error": "Эта бронь уже оплачена."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if booking.expires_at and timezone.now() > booking.expires_at:
+            booking.status = BookingStatus.CANCELLED
+            booking.save(update_fields=["status"])
+            return Response(
+                {"error": "Время брони истекло."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        payment = Payment.objects.create(
+            booking=booking,
+            amount=booking.total_amount,
+            status=PaymentStatus.PAID,
+            paid_at=timezone.now(),
+        )
+
+        booking.status = BookingStatus.CONFIRMED
+
+        channel_layer = get_channel_layer()
+        taken_seats = [
+            {"row_number": s.row_number, "seat_number": s.seat_number}
+            for s in booking.seats.all()
+        ]
+
+        async_to_sync(channel_layer.group_send)(
+            f"session_{booking.session.public_id}",
+            {
+                "type": "seat_update",
+                "session_id": str(booking.session.public_id),
+                "taken_seats": taken_seats,
+            },
+        )
+
+        booking.save(update_fields=["status"])
+
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class SessionSeatsView(APIView):
@@ -133,14 +138,16 @@ class SessionSeatsView(APIView):
         try:
             session = Session.objects.get(public_id=session_id)
         except Session.DoesNotExist:
-            return Response(
-                {"error": "Сеанс не найден"}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Сеанс не найден"}, status=404)
 
-        booked_seats = Seat.objects.filter(booked_seats__session=session).distinct()
+        booked_seats = Seat.objects.filter(
+            bookings__session=session,
+            bookings__status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
+        ).distinct()
 
         taken_seats = [
-            {"row": seat.row_number, "seat": seat.seat_number} for seat in booked_seats
+            {"row_number": seat.row_number, "seat_number": seat.seat_number}
+            for seat in booked_seats
         ]
 
         return Response(

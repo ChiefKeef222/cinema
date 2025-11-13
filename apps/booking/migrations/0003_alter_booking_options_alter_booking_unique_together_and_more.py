@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("booking", "0002_alter_booking_seats_alter_booking_session_and_more"),
         ("schedule", "0003_remove_seat_is_free"),

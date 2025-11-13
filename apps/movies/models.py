@@ -1,5 +1,4 @@
 from django.db import models
-import uuid
 
 from apps.common.abstract import AbstractModel
 

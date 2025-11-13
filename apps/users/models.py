@@ -13,7 +13,6 @@ from apps.common.abstract import AbstractModel, AbstractManager
 
 
 class UserManager(BaseUserManager, AbstractManager):
-
     def create_user(self, username, email, password=None, **kwargs):
         if username is None:
             raise TypeError("Пользователь должен иметь никнейм")

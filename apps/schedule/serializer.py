@@ -44,10 +44,10 @@ class HallSerializer(AbstractSerializer, serializers.ModelSerializer):
 
 class SessionSerializer(AbstractSerializer, serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True)
-    movie_id = serializers.SlugRelatedField(
+    movie = serializers.SlugRelatedField(
         slug_field="public_id", queryset=Movie.objects.all()
     )
-    hall_id = serializers.SlugRelatedField(
+    hall = serializers.SlugRelatedField(
         slug_field="public_id", queryset=Hall.objects.all()
     )
 
@@ -55,8 +55,8 @@ class SessionSerializer(AbstractSerializer, serializers.ModelSerializer):
         model = Session
         fields = [
             "id",
-            "movie_id",
-            "hall_id",
+            "movie",
+            "hall",
             "start_time",
             "price",
         ]

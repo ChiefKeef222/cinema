@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from apps.booking.views import PaymentAPIView
+from apps.booking.views import SessionSeatsView
 
 
 schema_view = get_schema_view(
@@ -24,12 +26,17 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("__debug__/", include(debug_toolbar.urls)),
     path("admin/", admin.site.urls),
-    path("api/", include("apps.common.api_router")),
+    path("api/", include("config.api_router")),
     path(
         "api/sessions/<uuid:session_id>/seats/",
-        include("apps.booking.urls_extra"),
+        SessionSeatsView.as_view(),
+        name="session-seats",
     ),
-    # Swagger UI
+    path(
+        "api/bookings/<int:booking_id>/pay/",
+        PaymentAPIView.as_view(),
+        name="booking-pay",
+    ),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),

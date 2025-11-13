@@ -38,13 +38,13 @@ class Seat(models.Model):
 
 
 class Session(AbstractModel):
-    movie_id = models.ForeignKey(
+    movie = models.ForeignKey(
         Movie,
         on_delete=models.CASCADE,
         related_name="movie_sessions",
         verbose_name="Фильм",
     )
-    hall_id = models.ForeignKey(
+    hall = models.ForeignKey(
         Hall, on_delete=models.CASCADE, related_name="hall_sessions", verbose_name="Зал"
     )
     start_time = models.DateTimeField(verbose_name="Время начала сеанса")
@@ -58,4 +58,4 @@ class Session(AbstractModel):
         ordering = ["start_time"]
 
     def __str__(self):
-        return f"{self.movie_id.title} — {self.hall_id.name} ({self.start_time:%d.%m %H:%M})"
+        return f"{self.movie.title} — {self.hall.name} ({self.start_time:%d.%m %H:%M})"

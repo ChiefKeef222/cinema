@@ -9,7 +9,6 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.throttling import UserRateThrottle
 
 from .serializer import UserSerializer, RegisterSerializer, LoginSerializer
-from .models import User
 
 
 class BookingRateThrottle(UserRateThrottle):
