@@ -72,7 +72,10 @@ GET /sessions/{session_id}/seats/ — забронированные места
 Бронирование:
 GET /bookings/ — просмотр бронирований
 POST /bookings/ — создать бронирование
+POST /bookings/<id>/pay - оплатить бронирование
+POST /bookings/<id>/cancel/ - отмненить бронирование
 ws://session/<uuid:session_id>/seats/ — WebSocket для обновления схемы залов в реальном времени
+
 ```
 Демо-данные
  - 3 фильма
