@@ -24,8 +24,8 @@ class HallViewSet(BaseCRUDViewSet):
 
 
 class SessionFilter(filters.FilterSet):
-    movie = filters.UUIDFilter(field_name="movie__public")
-    hall = filters.UUIDFilter(field_name="hall__public")
+    movie = filters.UUIDFilter(field_name="movie__public_id")
+    hall = filters.UUIDFilter(field_name="hall__public_id")
     date = filters.DateFilter(field_name="start_time", lookup_expr="date")
 
     class Meta:

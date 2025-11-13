@@ -4,7 +4,6 @@ from apps.common.abstract import AbstractModel
 
 
 class Movie(AbstractModel, models.Model):
-    id = models.BigAutoField(primary_key=True)
     title = models.CharField(
         max_length=255, verbose_name="Название фильма", db_index=True
     )
