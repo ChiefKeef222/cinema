@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.exceptions import Throttled
 
 from apps.booking.models import Booking, Payment, BookingStatus, PaymentStatus
 from apps.schedule.models import Session, Seat
@@ -18,11 +19,16 @@ from .serializer import (
 )
 
 
+class BookingPostThrottle(UserRateThrottle):
+    scope = "booking"
+
+
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.select_related("session", "user").prefetch_related(
         "seats"
     )
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = []  # throttle на весь ViewSet не ставим
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -34,6 +40,10 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
+        throttle = BookingPostThrottle()
+        if not throttle.allow_request(request, self):
+            raise Throttled(detail="Слишком много запросов, попробуйте через минуту")
+
         serializer = self.get_serializer(
             data=request.data, context={"request": request}
         )
@@ -48,7 +58,6 @@ class BookingViewSet(viewsets.ModelViewSet):
             {"row_number": s.row_number, "seat_number": s.seat_number}
             for s in booking.seats.all()
         ]
-
         async_to_sync(channel_layer.group_send)(
             f"session_{booking.session.public_id}",
             {
@@ -109,13 +118,13 @@ class PaymentAPIView(APIView):
         )
 
         booking.status = BookingStatus.CONFIRMED
+        booking.save(update_fields=["status"])
 
         channel_layer = get_channel_layer()
         taken_seats = [
             {"row_number": s.row_number, "seat_number": s.seat_number}
             for s in booking.seats.all()
         ]
-
         async_to_sync(channel_layer.group_send)(
             f"session_{booking.session.public_id}",
             {
@@ -124,8 +133,6 @@ class PaymentAPIView(APIView):
                 "taken_seats": taken_seats,
             },
         )
-
-        booking.save(update_fields=["status"])
 
         serializer = PaymentSerializer(payment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

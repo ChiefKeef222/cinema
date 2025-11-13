@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "user": "1000/day",
-        "booking": "2/minute",
+        "booking": "2/min",
     },
     "EXCEPTION_HANDLER": "apps.common.exception.custom_exception_handler",
 }
