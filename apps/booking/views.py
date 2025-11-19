@@ -50,19 +50,30 @@ class BookingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         booking = serializer.save()
 
-        booking.expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        booking.expires_at = timezone.now() + timezone.timedelta(minutes=15)
+
+        # Schedule a task to check for booking expiration
+        from .tasks import check_booking_expiration
+
+        task = check_booking_expiration.apply_async(
+            (booking.id,), eta=booking.expires_at
+        )
+        booking.task_id = task.id
         booking.save()
 
         channel_layer = get_channel_layer()
-        taken_seats = [
-            {"row_number": s.row_number, "seat_number": s.seat_number}
-            for s in booking.seats.all()
-        ]
+        taken_seats = list(
+            Booking.objects.filter(
+                session_id=booking.session.id,
+                status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
+            )
+            .values_list("seats__id", flat=True)
+            .distinct()
+        )
         async_to_sync(channel_layer.group_send)(
-            f"session_{booking.session.public_id}",
+            f"seat_updates_{booking.session.id}",
             {
                 "type": "seat_update",
-                "session_id": str(booking.session.public_id),
                 "taken_seats": taken_seats,
             },
         )
@@ -74,6 +85,11 @@ class BookingViewSet(viewsets.ModelViewSet):
     def cancel_booking(self, request, pk=None):
         booking = self.get_object()
         if booking.status in [BookingStatus.CONFIRMED, BookingStatus.PENDING]:
+            if booking.task_id:
+                from config.celery import app as celery_app
+
+                celery_app.control.revoke(booking.task_id)
+
             booking.status = BookingStatus.CANCELLED
             booking.save(update_fields=["status"])
             return Response({"detail": "Бронь успешно отменена."})
@@ -104,11 +120,17 @@ class PaymentAPIView(APIView):
             )
 
         if booking.expires_at and timezone.now() > booking.expires_at:
-            booking.status = BookingStatus.CANCELLED
+            booking.status = BookingStatus.EXPIRED  # Changed from CANCELLED
             booking.save(update_fields=["status"])
             return Response(
                 {"error": "Время брони истекло."}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Revoke the expiration task as the booking is being paid
+        if booking.task_id:
+            from config.celery import app as celery_app
+
+            celery_app.control.revoke(booking.task_id)
 
         payment = Payment.objects.create(
             booking=booking,

@@ -48,6 +48,9 @@ class Booking(AbstractModel):
     expires_at = models.DateTimeField(
         null=True, blank=True, verbose_name="Время истечения брони"
     )
+    task_id = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="ID задачи Celery"
+    )
 
     class Meta:
         verbose_name = "Бронирование"

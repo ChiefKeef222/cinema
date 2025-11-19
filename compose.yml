@@ -45,6 +45,38 @@ services:
       DATABASE_HOST: ${DB_HOST}
       DATABASE_PORT: ${DB_PORT}
 
+  celery-worker:
+    build: .
+    container_name: celery-worker
+    command: celery -A config worker -l info -E
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+
+  flower:
+    build: .
+    container_name: flower
+    command: celery -A config flower --address=0.0.0.0 --port=5555 --enable_events=True --broker_api=redis://redis:6379/0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery-worker
+      - redis
+    env_file:
+      - .env
+
 volumes:
   postgres_data:
   static_volume:

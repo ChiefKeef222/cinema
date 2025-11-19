@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from datetime import timedelta, datetime
 import environ
+from celery.schedules import crontab
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_standardized_errors",
     "channels",
+    "django_celery_beat",
     "apps.movies",
     "apps.users",
     "apps.schedule",
@@ -256,3 +258,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+
+# Celery
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "check_expired_bookings_daily": {
+        "task": "apps.booking.tasks.check_all_expired_bookings",
+        "schedule": crontab(hour=3, minute=0),
+    },
+}
