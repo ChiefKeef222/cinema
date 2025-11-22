@@ -8,17 +8,11 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.throttling import UserRateThrottle
 
-from .serializer import UserSerializer, RegisterSerializer, LoginSerializer
+from .serializer import RegisterSerializer, LoginSerializer
 
 
 class BookingRateThrottle(UserRateThrottle):
     scope = "user"
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    http_method_names = ["get", "patch", "put"]
-    permission_classes = [AllowAny]
-    serializer_class = UserSerializer
 
 
 class RegisterViewSet(ViewSet):
