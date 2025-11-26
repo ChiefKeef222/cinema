@@ -45,6 +45,7 @@ class MovieViewSet(BaseCRUDViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     filter_backends = [filters.SearchFilter]
+    filterset_fields = {"start_time": ["date"]}
     search_fields = ["title"]
     object_verbose_name = "Фильм"
 

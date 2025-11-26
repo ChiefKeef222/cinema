@@ -17,8 +17,8 @@ class TestMovieViewSet:
         self.client.force_authenticate(user=user)
         response = self.client.get(self.list_create_endpoint)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 1
-        assert response.data[0]["title"] == movie.title
+        assert response.data["count"] >= 1
+        assert response.data["results"][0]["title"] == movie.title
 
     def test_create_movie_by_regular_user_fails(self, user):
         self.client.force_authenticate(user=user)
