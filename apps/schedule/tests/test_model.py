@@ -1,8 +1,6 @@
 import pytest
 from apps.schedule.models import Hall, Seat, Session
 
-# Import fixtures directly as a workaround for the project's discovery issue
-
 
 @pytest.mark.django_db
 class TestScheduleModels:

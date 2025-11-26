@@ -80,6 +80,7 @@ class SeatSerializer(serializers.ModelSerializer):
 
 
 class BookingListSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="public_id", read_only=True)
     seats = SeatSerializer(many=True)
     session_title = serializers.CharField(source="session.movie.title", read_only=True)
     session_start = serializers.DateTimeField(
@@ -103,7 +104,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = ["id", "booking", "amount", "status", "paid_at"]
-        read_only_fields = ["status", "paid_at"]
+        read_only_fields = ["amount", "status", "paid_at"]
 
     def create(self, validated_data):
         booking = validated_data["booking"]

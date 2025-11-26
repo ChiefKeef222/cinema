@@ -7,8 +7,6 @@ from apps.schedule.serializer import HallSerializer, SessionSerializer
 from apps.schedule.models import Hall, Seat, Session
 from apps.movies.models import Movie
 
-# фикстуры
-
 
 @pytest.mark.django_db
 class TestHallSerializer:

@@ -66,11 +66,14 @@ class Booking(AbstractModel):
         if not self.expires_at:
             self.expires_at = timezone.now() + timedelta(minutes=15)
 
-        if not self.total_amount:
-            seat_count = self.seats.count() if self.pk else 0
-            self.total_amount = (
-                self.session.price * seat_count if seat_count else self.session.price
-            )
+        seat_count = self.seats.count() if self.pk else 0
+        if seat_count > 0:
+            self.total_amount = self.session.price * seat_count
+        else:
+            # If there are no seats, maybe the booking is just initiated.
+            # Defaulting to a single ticket price might be a business rule.
+            # Or it could be 0. Based on the old logic, it was 1 ticket.
+            self.total_amount = self.session.price
 
         super().save(*args, **kwargs)
 

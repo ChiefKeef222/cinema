@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from datetime import datetime, timedelta
 import zoneinfo
 
-# Import fixtures directly as a workaround for the project's discovery issue
 from apps.schedule.models import Hall, Session
 from apps.movies.models import Movie
 

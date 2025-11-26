@@ -29,6 +29,8 @@ class BookingViewSet(viewsets.ModelViewSet):
     )
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = []  # throttle на весь ViewSet не ставим
+    lookup_field = "public_id"
+    lookup_url_kwarg = "public_id"
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -82,7 +84,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Response(output.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post"], url_path="cancel")
-    def cancel_booking(self, request, pk=None):
+    def cancel_booking(self, request, public_id=None):
         booking = self.get_object()
         if booking.status in [BookingStatus.CONFIRMED, BookingStatus.PENDING]:
             if booking.task_id:
