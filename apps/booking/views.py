@@ -105,7 +105,7 @@ class PaymentAPIView(APIView):
 
     def post(self, request, booking_id):
         try:
-            booking = Booking.objects.get(id=booking_id, user=request.user)
+            booking = Booking.objects.get(public_id=booking_id, user=request.user)
         except Booking.DoesNotExist:
             return Response(
                 {"error": "Бронь не найдена."}, status=status.HTTP_404_NOT_FOUND
@@ -128,7 +128,6 @@ class PaymentAPIView(APIView):
                 {"error": "Время брони истекло."}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Revoke the expiration task as the booking is being paid
         if booking.task_id:
             from config.celery import app as celery_app
 

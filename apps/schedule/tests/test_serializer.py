@@ -24,7 +24,7 @@ class TestHallSerializer:
 
         assert Hall.objects.count() == 1
         assert hall.name == "Test Hall with Seats"
-        assert hall.seats.count() == 5  # 3 + 2
+        assert hall.seats.count() == 5
 
         seats = hall.seats.all().order_by("row_number", "seat_number")
         assert seats[0].row_number == 1
@@ -49,7 +49,6 @@ class TestHallSerializer:
         assert "Rows list cannot be empty." in str(excinfo.value)
 
     def test_create_hall_with_invalid_row_data_fails(self):
-        # seats = 0 -> твой validate_rows даёт "Seats count must be greater than zero."
         data = {
             "name": "Hall with Invalid Rows",
             "rows": [
@@ -63,7 +62,6 @@ class TestHallSerializer:
 
         assert "Seats count must be greater than zero." in str(excinfo.value)
 
-        # Дополнительная проверка: нет seats
         data = {
             "name": "Hall with Missing Seats",
             "rows": [
@@ -94,7 +92,6 @@ class TestHallSerializer:
 @pytest.mark.django_db
 class TestSessionSerializer:
     def test_create_session(self, movie: Movie, hall: Hall):
-        # используем Asia/Almaty
         almaty_tz = zoneinfo.ZoneInfo("Asia/Almaty")
         start_time = datetime.now(almaty_tz) + timedelta(hours=1)
 
@@ -165,9 +162,8 @@ class TestSessionSerializer:
         assert data["movie"] == movie.public_id
         assert data["hall"] == hall.public_id
 
-        # Преобразуем строку ISO из сериализатора в datetime
         parsed = datetime.fromisoformat(data["start_time"])
-        # Переводим оба в UTC и сравниваем
+
         start_utc = parsed.astimezone(timezone.utc)
         session_utc = session.start_time.astimezone(timezone.utc)
 

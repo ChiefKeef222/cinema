@@ -8,13 +8,9 @@ from apps.booking.models import Booking, BookingStatus
 from apps.users.models import User
 from apps.schedule.models import Seat, Hall, Session
 
-# Import shared fixtures
 
-
-# Fixtures specific to these tests
 @pytest.fixture
 def other_user(db) -> User:
-    """A second user for testing permissions and isolation."""
     return User.objects.create_user(
         username="otheruser", email="other@user.com", password="Barsik_04"
     )
@@ -22,7 +18,6 @@ def other_user(db) -> User:
 
 @pytest.fixture
 def seats(db, hall: Hall) -> list[Seat]:
-    """A set of seats for the tests."""
     return [
         Seat.objects.create(hall=hall, row_number=1, seat_number=i + 1)
         for i in range(5)
@@ -31,7 +26,6 @@ def seats(db, hall: Hall) -> list[Seat]:
 
 @pytest.fixture
 def booking(db, user: User, session: Session, seats: list[Seat]) -> Booking:
-    """A booking belonging to the primary test user."""
     b = Booking.objects.create(user=user, session=session)
     b.seats.add(seats[0], seats[1])
     b.save()
@@ -40,7 +34,6 @@ def booking(db, user: User, session: Session, seats: list[Seat]) -> Booking:
 
 @pytest.fixture
 def other_booking(db, other_user: User, session: Session, seats: list[Seat]) -> Booking:
-    """A booking belonging to the secondary 'other' user."""
     b = Booking.objects.create(user=other_user, session=session)
     b.seats.add(seats[2], seats[3])
     b.save()
@@ -60,7 +53,6 @@ class TestBookingViewSet:
         return reverse("booking-cancel-booking", kwargs={"public_id": booking_id})
 
     def test_auth_required(self):
-        """Test that authentication is required for all booking endpoints."""
         response = self.client.get(self.list_create_url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -72,11 +64,7 @@ class TestBookingViewSet:
     def test_create_booking_success(
         self, mock_get_channel_layer, mock_check_expiration, user, session, seats
     ):
-        """Test successful booking creation."""
-        # Configure mocks
-        mock_task_result = MagicMock()
-        mock_task_result.id = "fake-celery-task-id"
-        mock_check_expiration.return_value = mock_task_result
+        mock_check_expiration.return_value = MagicMock(id="fake-celery-task-id")
         channel_layer_mock = MagicMock()
         channel_layer_mock.group_send = AsyncMock()
         mock_get_channel_layer.return_value = channel_layer_mock
@@ -99,7 +87,6 @@ class TestBookingViewSet:
         channel_layer_mock.group_send.assert_called_once()
 
     def test_list_user_bookings(self, user, booking, other_booking):
-        """Test that a user can only list their own bookings."""
         self.client.force_authenticate(user=user)
         response = self.client.get(self.list_create_url)
 
@@ -107,10 +94,7 @@ class TestBookingViewSet:
         assert response.data["count"] == 1
         assert response.data["results"][0]["id"] == str(booking.public_id)
 
-    # test_retrieve_own_booking was removed as requested by the user.
-
     def test_cannot_retrieve_other_user_booking(self, user, other_booking):
-        """Test that a user cannot retrieve another user's booking."""
         self.client.force_authenticate(user=user)
         url = self.detail_url(other_booking.public_id)
         response = self.client.get(url)
@@ -119,7 +103,6 @@ class TestBookingViewSet:
 
     @patch("config.celery.app.control.revoke")
     def test_cancel_booking_success(self, mock_celery_revoke, user, booking):
-        """Test successfully cancelling a booking."""
         booking.task_id = "some-celery-task-id"
         booking.save()
 
@@ -135,7 +118,6 @@ class TestBookingViewSet:
         mock_celery_revoke.assert_called_once_with("some-celery-task-id")
 
     def test_cancel_already_cancelled_booking_fails(self, user, booking):
-        """Test that a booking that is already cancelled cannot be cancelled again."""
         booking.status = BookingStatus.CANCELLED
         booking.save()
 
@@ -145,11 +127,116 @@ class TestBookingViewSet:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    #
+    # @patch("apps.booking.tasks.check_booking_expiration.apply_async")
+    # @patch("apps.booking.views.get_channel_layer")
+    # def test_create_booking_throttling(
+    #         self,
+    #         mock_get_channel_layer,
+    #         mock_check_expiration,
+    #         user,
+    #         session,
+    #         seats,
+    # ):
+    #     mock_check_expiration.return_value = MagicMock(id="fake-celery-task-id") # FIX
+    #     channel_layer_mock = MagicMock()
+    #     channel_layer_mock.group_send = AsyncMock()
+    #     mock_get_channel_layer.return_value = channel_layer_mock
+    #
+    #     self.client.force_authenticate(user=user)
+    #     data = {
+    #         "session": str(session.public_id),
+    #         "seats": [
+    #             {
+    #                 "row_number": s.row_number,
+    #                 "seat_number": s.seat_number,
+    #             }
+    #             for s in [seats[0]]
+    #         ],
+    #     }
+    #     response1 = self.client.post(self.list_create_url, data, format="json")
+    #     assert response1.status_code == status.HTTP_201_CREATED
+    #
+    #     data["seats"] = [
+    #         {
+    #             "row_number": s.row_number,
+    #             "seat_number": s.seat_number,
+    #         }
+    #         for s in [seats[1]]
+    #     ]
+    #     response2 = self.client.post(self.list_create_url, data, format="json")
+    #     assert response2.status_code == status.HTTP_201_CREATED
+    #
+    #     data["seats"] = [
+    #         {
+    #             "row_number": s.row_number,
+    #             "seat_number": s.seat_number,
+    #         }
+    #         for s in [seats[2]]
+    #     ]
+    #     response3 = self.client.post(self.list_create_url, data, format="json")
+    #     assert response3.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    #     assert "Request was throttled" in response3.data["detail"]
+    #
+    # @patch("apps.booking.views.BookingViewSet.perform_create")
+    # @patch("logging.getLogger")
+    # def test_internal_server_error_logs_correctly(
+    #         self,
+    #         mock_get_logger,
+    #         mock_perform_create,
+    #         user,
+    #         session,
+    #         seats,
+    # ):
+    #     mock_perform_create.side_effect = Exception("Simulated internal server error")
+    #     mock_logger = MagicMock()
+    #     mock_get_logger.return_value = mock_logger
+    #
+    #     self.client.force_authenticate(user=user)
+    #     data = {
+    #         "session": str(session.public_id),
+    #         "seats": [
+    #             {
+    #                 "row_number": s.row_number,
+    #                 "seat_number": s.seat_number,
+    #             }
+    #             for s in [seats[0]]
+    #         ],
+    #     }
+    #     response = self.client.post(self.list_create_url, data, format="json")
+    #
+    #     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    #     mock_logger.error.assert_called_once()
+    #     assert "Simulated internal server error" in mock_logger.error.call_args[0][0] # More specific log message check if needed
 
-@pytest.mark.django_db
-class TestPaymentAndSessionViews:
-    def setup_method(self):
-        self.client = APIClient()
+    # @patch("apps.booking.tasks.check_booking_expiration.apply_async")
+    # @patch("apps.booking.views.get_channel_layer")
+    # def test_create_booking_with_invalid_data_fails(
+    #         self,
+    #         mock_get_channel_layer,
+    #         mock_check_expiration,
+    #         user,
+    #         session,
+    #         seats,
+    # ):
+    # mock_check_expiration.return_value = MagicMock(id="fake-celery-task-id") # FIX
+    # self.client.force_authenticate(user=user)
+    #  Отсутствует обязательное поле 'session'
+    # data = {
+    #     "seats": [
+    #         {
+    #             "row_number": s.row_number,
+    #             "seat_number": s.seat_number,
+    #         }
+    #         for s in [seats[0], seats[1]]
+    #     ],
+    # }
+    # response = self.client.post(self.list_create_url, data, format="json")
+    # assert response.status_code == status.HTTP_400_BAD_REQUEST
+    # assert "session" in response.data
+    # assert "This field is required." in response.data["session"]
+    # mock_check_expiration.assert_not_called()
+    # mock_get_channel_layer.assert_not_called()
 
     def pay_url(self, booking_id):
         return reverse("booking-pay", kwargs={"booking_id": booking_id})
@@ -162,8 +249,6 @@ class TestPaymentAndSessionViews:
     def test_payment_success(
         self, mock_celery_revoke, mock_get_channel_layer, user, booking
     ):
-        """Test successful payment for a booking."""
-        # Configure mock for channel layer
         channel_layer_mock = MagicMock()
         channel_layer_mock.group_send = AsyncMock()
         mock_get_channel_layer.return_value = channel_layer_mock
@@ -173,7 +258,7 @@ class TestPaymentAndSessionViews:
         booking.save()
 
         self.client.force_authenticate(user=user)
-        url = self.pay_url(booking.id)  # URL uses integer ID
+        url = self.pay_url(booking.id)
         response = self.client.post(url)
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -184,20 +269,17 @@ class TestPaymentAndSessionViews:
         channel_layer_mock.group_send.assert_called_once()
 
     def test_payment_for_other_user_booking_fails(self, user, other_booking):
-        """Test that a user cannot pay for another user's booking."""
         self.client.force_authenticate(user=user)
         url = self.pay_url(other_booking.id)
         response = self.client.post(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_session_seats(self, session, other_booking):
-        """Test that the session seats view returns taken seats correctly."""
         url = self.seats_url(session.public_id)
         response = self.client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data["sessionId"] == str(session.public_id)
-        # other_booking has seats 2 and 3 (index) from the seats fixture
         taken = response.data["takenSeats"]
         assert len(taken) == other_booking.seats.count()
         assert {"row_number": 1, "seat_number": 3} in taken

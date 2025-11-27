@@ -33,7 +33,7 @@ urlpatterns = [
         name="session-seats",
     ),
     path(
-        "api/bookings/<int:booking_id>/pay/",
+        "api/bookings/<uuid:booking_id>/pay/",
         PaymentAPIView.as_view(),
         name="booking-pay",
     ),

@@ -35,7 +35,6 @@ class TestHallViewSet:
 
     def test_retrieve_hall_with_seats(self, user, hall):
         self.client.force_authenticate(user=user)
-        # Create seats for the hall
         from apps.schedule.models import Seat
 
         Seat.objects.create(hall=hall, row_number=1, seat_number=1)
@@ -49,7 +48,6 @@ class TestHallViewSet:
         assert response.data["seats"][0]["seat_number"] == 1
 
     def test_list_halls_empty(self, user):
-        # Ensure no halls exist other than the ones created by fixtures for this test run
         Hall.objects.all().delete()
         self.client.force_authenticate(user=user)
         response = self.client.get(self.list_create_endpoint)
@@ -69,9 +67,8 @@ class TestHallViewSet:
         response = self.client.post(self.list_create_endpoint, data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
 
-        # Verify hall and seats were created
         new_hall = Hall.objects.get(name="Small Hall")
-        assert new_hall.seats.count() == 13  # 5 + 8
+        assert new_hall.seats.count() == 13
 
     def test_update_hall_by_superuser(self, superuser, hall):
         self.client.force_authenticate(user=superuser)
@@ -79,7 +76,7 @@ class TestHallViewSet:
         updated_name = "Updated Main Hall"
         data = {
             "name": updated_name,
-            "rows": [  # rows field is write_only, so it must be provided for update too if we want to change it.
+            "rows": [
                 {"row_number": 1, "seats": 5},
                 {"row_number": 2, "seats": 5},
             ],
@@ -88,18 +85,17 @@ class TestHallViewSet:
         assert response.status_code == status.HTTP_200_OK
         hall.refresh_from_db()
         assert hall.name == updated_name
-        assert hall.seats.count() == 10  # 5 + 5
+        assert hall.seats.count() == 10
 
     def test_partial_update_hall_by_superuser(self, superuser, hall):
         self.client.force_authenticate(user=superuser)
         endpoint = self.get_detail_endpoint(hall.public_id)
         updated_name = "Partially Updated Hall"
-        data = {"name": updated_name}  # Only updating name
+        data = {"name": updated_name}
         response = self.client.patch(endpoint, data, format="json")
         assert response.status_code == status.HTTP_200_OK
         hall.refresh_from_db()
         assert hall.name == updated_name
-        # Seats should remain unchanged for partial update unless 'rows' is provided
 
     def test_create_hall_by_user_fails(self, user):
         self.client.force_authenticate(user=user)
@@ -118,9 +114,7 @@ class TestHallViewSet:
         self.client.force_authenticate(user=superuser)
         endpoint = self.get_detail_endpoint(hall.public_id)
         response = self.client.delete(endpoint)
-        assert (
-            response.status_code == status.HTTP_200_OK
-        )  # Custom implementation returns 200
+        assert response.status_code == status.HTTP_200_OK
         assert not Hall.objects.filter(pk=hall.pk).exists()
 
     def test_unauthenticated_list_halls_fails(self):
@@ -174,7 +168,7 @@ class TestSessionViewSet:
         assert str(response.data["hall"]) == str(session.hall.public_id)
 
     def test_list_sessions_empty(self, user):
-        Session.objects.all().delete()  # Clear existing sessions
+        Session.objects.all().delete()
         self.client.force_authenticate(user=user)
         response = self.client.get(self.list_create_endpoint)
         assert response.status_code == status.HTTP_200_OK
@@ -261,7 +255,6 @@ class TestSessionViewSet:
 
     def test_filter_session_by_movie(self, user, session, movie):
         self.client.force_authenticate(user=user)
-        # Create another session with a different movie to ensure filtering works
         other_movie = Movie.objects.create(title="Another Movie", duration=90)
         Session.objects.create(
             movie=other_movie,
@@ -292,7 +285,6 @@ class TestSessionViewSet:
 
         assert response.status_code == status.HTTP_200_OK
 
-        # пагинация: данные лежат в "results"
         assert response.data["count"] == 1
         assert len(response.data["results"]) == 1
 
