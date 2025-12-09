@@ -55,25 +55,25 @@ POST /auth/refresh/ — обновление JWT
 
 Фильмы:
 GET /movies/ — список фильмов
-GET /movies/{id}/ — конкретный фильм
+GET /movies/{uuid}/ — конкретный фильм
 POST /movies/ — создать фильм
-PUT /movies/{id}/, PATCH /movies/{id}/ — обновить данные
-DELETE /movies/{id}/ — удалить фильм
+PUT /movies/{uuid}/, PATCH /movies/{id}/ — обновить данные
+DELETE /movies/{uuid}/ — удалить фильм
 
 Залы и сеансы:
 GET /hall/ — список залов
 GET /session/ — список сеансов
 POST /hall/, POST /session/ — создание залов/сеансов
-PATCH /hall/{id}/, PUT/PATCH /session/{id}/ — обновление
-GET /hall/{id}/, GET /session/{id}/ — детали
-DELETE /hall/{id}/, DELETE /session/{id}/ — удалить
+PATCH /hall/{uuid}/, PUT/PATCH /session/{id}/ — обновление
+GET /hall/{uuid}/, GET /session/{id}/ — детали
+DELETE /hall/{uuid}/, DELETE /session/{id}/ — удалить
 GET /sessions/{session_id}/seats/ — забронированные места
 
 Бронирование:
 GET /bookings/ — просмотр бронирований
 POST /bookings/ — создать бронирование
-POST /bookings/<id>/pay - оплатить бронирование
-POST /bookings/<id>/cancel/ - отмненить бронирование
+POST /bookings/{uuid}/pay - оплатить бронирование
+POST /bookings/{uuid}/cancel/ - отмненить бронирование
 ws://session/<uuid:session_id>/seats/ — WebSocket для обновления схемы залов в реальном времени
 
 ```
@@ -98,3 +98,4 @@ CI/CD
  - Redis
  - Docker
  - Swagger / drf-yasg
+ - Celery
