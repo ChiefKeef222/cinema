@@ -9,6 +9,7 @@ class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
         fields = ["row_number", "seat_number"]
+        ref_name = "ScheduleSeat"
 
 
 class HallSerializer(AbstractSerializer, serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.db import transaction
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +9,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.exceptions import Throttled
+from drf_yasg.utils import swagger_auto_schema
 
 from apps.booking.models import Booking, Payment, BookingStatus, PaymentStatus
 from apps.schedule.models import Session, Seat
@@ -23,7 +24,12 @@ class BookingPostThrottle(UserRateThrottle):
     scope = "booking"
 
 
-class BookingViewSet(viewsets.ModelViewSet):
+class BookingViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Booking.objects.select_related("session", "user").prefetch_related(
         "seats"
     )
@@ -40,6 +46,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
+    @swagger_auto_schema(responses={status.HTTP_201_CREATED: BookingListSerializer})
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         throttle = BookingPostThrottle()

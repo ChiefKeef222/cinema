@@ -4,13 +4,14 @@ from apps.booking.models import Booking, Payment, BookingStatus, PaymentStatus
 from apps.schedule.models import Seat, Session
 
 
+class SeatCoordinateSerializer(serializers.Serializer):
+    row_number = serializers.IntegerField()
+    seat_number = serializers.IntegerField()
+
+
 class BookingCreateSerializer(serializers.Serializer):
     session = serializers.UUIDField()
-    seats = serializers.ListField(
-        child=serializers.DictField(
-            child=serializers.IntegerField(),
-        ),
-    )
+    seats = SeatCoordinateSerializer(many=True)
 
     def validate(self, attrs):
         from apps.schedule.models import Seat
@@ -77,6 +78,7 @@ class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
         fields = ["row_number", "seat_number"]
+        ref_name = "BookingSeat"
 
 
 class BookingListSerializer(serializers.ModelSerializer):

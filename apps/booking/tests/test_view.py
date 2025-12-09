@@ -258,7 +258,7 @@ class TestBookingViewSet:
         booking.save()
 
         self.client.force_authenticate(user=user)
-        url = self.pay_url(booking.id)
+        url = self.pay_url(booking.public_id)
         response = self.client.post(url)
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -270,7 +270,7 @@ class TestBookingViewSet:
 
     def test_payment_for_other_user_booking_fails(self, user, other_booking):
         self.client.force_authenticate(user=user)
-        url = self.pay_url(other_booking.id)
+        url = self.pay_url(other_booking.public_id)
         response = self.client.post(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
